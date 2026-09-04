@@ -1,0 +1,10 @@
+services:
+  tesis:
+    build: .
+    restart: unless-stopped
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4.1}
+      - PORT=3000
+    ports:
+      - "3000:3000"

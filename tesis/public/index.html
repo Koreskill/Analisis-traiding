@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tesis — mesa de trabajo del inversor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAFAFC; --panel:#FFFFFF; --panel-2:#F4F4F9;
+  --ink:#17171F; --ink-2:#5D5D72; --ink-3:#8C8CA3;
+  --line:#E7E7F0; --line-2:#D6D6E4;
+  --peri:#B9C2FF; --mint:#A8E8CE; --apricot:#FFCBA6; --lilac:#E0C4FF; --sky:#AEDDF2;
+  --peri-soft:#EEF0FF; --mint-soft:#E8FAF2; --apricot-soft:#FFF1E7; --lilac-soft:#F6EDFF; --sky-soft:#EBF7FD;
+  --accent:#4B3BD6; --accent-soft:#EDEBFF; --on-accent:#FFFFFF;
+  --good:#1F8F62; --warn:#B5761F; --bad:#C9463F;
+  --r:16px; --r-s:10px;
+  --shadow:0 1px 2px rgba(23,23,31,.04), 0 8px 24px -12px rgba(75,59,214,.12);
+}
+@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]){
+  --bg:#121220; --panel:#1A1A2B; --panel-2:#202034;
+  --ink:#EDEDF5; --ink-2:#A9A9C0; --ink-3:#7B7B95;
+  --line:#2A2A42; --line-2:#353552;
+  --peri-soft:#1E1F3B; --mint-soft:#132E27; --apricot-soft:#33241A; --lilac-soft:#251B38; --sky-soft:#12262F;
+  --accent:#A99BFF; --accent-soft:#25234A; --on-accent:#16162A;
+  --good:#5CD6A0; --warn:#E0A94F; --bad:#F0776F;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --bg:#121220; --panel:#1A1A2B; --panel-2:#202034;
+  --ink:#EDEDF5; --ink-2:#A9A9C0; --ink-3:#7B7B95;
+  --line:#2A2A42; --line-2:#353552;
+  --peri-soft:#1E1F3B; --mint-soft:#132E27; --apricot-soft:#33241A; --lilac-soft:#251B38; --sky-soft:#12262F;
+  --accent:#A99BFF; --accent-soft:#25234A; --on-accent:#16162A;
+  --good:#5CD6A0; --warn:#E0A94F; --bad:#F0776F;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.num{font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric:tabular-nums;}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- shell ---------- */
+.app{display:grid; grid-template-columns:236px 1fr; min-height:100vh}
+.rail{
+  border-right:1px solid var(--line); background:var(--panel);
+  padding:20px 14px; display:flex; flex-direction:column; gap:18px; position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.brand{display:flex; align-items:center; gap:9px; padding:0 6px}
+.brand .mark{width:26px;height:26px;border-radius:8px;
+  background:conic-gradient(from 210deg, var(--peri), var(--mint), var(--apricot), var(--lilac), var(--peri));
+  box-shadow:inset 0 0 0 3px var(--panel);}
+.brand h1{font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.02em}
+.brand span{font-size:11.5px;color:var(--ink-3);display:block;line-height:1.2;margin-top:-2px}
+.rail-label{font-size:11.5px;color:var(--ink-3);padding:0 6px;letter-spacing:.01em}
+.colist{display:flex;flex-direction:column;gap:4px}
+.co{
+  display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:var(--r-s);
+  cursor:pointer;border:1px solid transparent;background:transparent;text-align:left;width:100%;
+}
+.co:hover{background:var(--panel-2)}
+.co[aria-current="true"]{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 22%, transparent)}
+.co .tk{font-weight:600;font-size:13.5px;letter-spacing:-.01em}
+.co .nm{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.co .dot{width:7px;height:7px;border-radius:50%;flex:none;background:var(--line-2)}
+.co .meta{min-width:0;flex:1}
+.btn{
+  border:1px solid var(--line-2); background:var(--panel); border-radius:var(--r-s);
+  padding:8px 12px; cursor:pointer; font-size:13.5px; font-weight:500; transition:background .12s, border-color .12s;
+}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.primary[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.btn.ghost:hover{background:var(--panel-2)}
+.btn.sm{padding:5px 9px;font-size:12.5px;border-radius:8px}
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.status{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-3);padding:0 6px}
+.status i{width:6px;height:6px;border-radius:50%;background:var(--warn);flex:none}
+.status.on i{background:var(--good)}
+
+/* ---------- main ---------- */
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{
+  position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+  padding:12px 28px; display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.tabs{display:flex;gap:3px;background:var(--panel-2);padding:3px;border-radius:11px}
+.tab{border:0;background:transparent;padding:6px 15px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--ink-2)}
+.tab[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(23,23,31,.06)}
+.topbar .grow{flex:1}
+.wrap{padding:26px 28px 80px;max-width:1180px;width:100%;margin:0 auto}
+.hidden{display:none!important}
+
+/* ---------- hero capture ---------- */
+.desk{
+  border:1px solid var(--line); border-radius:22px; padding:26px; background:var(--panel);
+  background-image:
+    radial-gradient(680px 220px at 8% -10%, var(--peri-soft), transparent 65%),
+    radial-gradient(520px 200px at 92% 0%, var(--mint-soft), transparent 60%),
+    radial-gradient(420px 260px at 55% 120%, var(--lilac-soft), transparent 65%);
+  box-shadow:var(--shadow);
+}
+.desk h2{margin:0 0 4px;font-size:26px;font-weight:600;letter-spacing:-.028em;line-height:1.15}
+.desk p.lede{margin:0 0 20px;color:var(--ink-2);font-size:14.5px;max-width:62ch}
+.drop{
+  border:1.5px dashed var(--line-2); border-radius:var(--r); padding:26px 20px; text-align:center;
+  background:color-mix(in srgb,var(--panel) 70%, transparent); cursor:pointer; transition:border-color .15s, background .15s;
+}
+.drop:hover,.drop.over{border-color:var(--accent); background:var(--accent-soft)}
+.drop .big{font-weight:500;font-size:15px}
+.drop .small{font-size:12.5px;color:var(--ink-3);margin-top:3px}
+.cap-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}
+.field{
+  width:100%;border:1px solid var(--line-2);background:var(--panel);border-radius:var(--r-s);
+  padding:9px 11px;font-size:14px;
+}
+textarea.field{resize:vertical;min-height:96px;line-height:1.5}
+
+/* ---------- sources ---------- */
+.srcs{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.src{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 9px 6px 8px;border-radius:9px;
+  border:1px solid var(--line);background:var(--panel);font-size:12.5px;max-width:100%;
+}
+.src .ck{width:15px;height:15px;border-radius:50%;background:var(--mint);display:grid;place-items:center;flex:none}
+.src .ck svg{width:9px;height:9px}
+.src .tag{font-size:10.5px;color:var(--ink-3);background:var(--panel-2);padding:1px 5px;border-radius:5px}
+.src b{font-weight:500;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src .x{border:0;background:transparent;color:var(--ink-3);cursor:pointer;padding:0 1px;font-size:14px;line-height:1}
+.src .x:hover{color:var(--bad)}
+
+/* ---------- ficha ---------- */
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)} .g6{grid-template-columns:repeat(6,1fr)}
+label.lab{display:block;font-size:11.5px;color:var(--ink-3);margin-bottom:4px}
+section.block{margin-top:24px}
+section.block > h3{
+  font-size:15px;font-weight:600;margin:0 0 3px;letter-spacing:-.015em;display:flex;align-items:center;gap:9px;
+}
+section.block > p.sub{margin:0 0 13px;color:var(--ink-3);font-size:12.5px}
+.card{border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:16px}
+
+/* ---------- steps ---------- */
+.steps{display:flex;flex-direction:column;gap:10px}
+.step{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);overflow:hidden}
+.step > summary{
+  list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:12px;
+}
+.step > summary::-webkit-details-marker{display:none}
+.step .idx{
+  width:24px;height:24px;border-radius:8px;display:grid;place-items:center;flex:none;
+  font-size:12px;font-weight:600;background:var(--peri-soft);color:var(--accent);
+}
+.step:nth-of-type(2) .idx{background:var(--mint-soft);color:var(--good)}
+.step:nth-of-type(3) .idx{background:var(--apricot-soft);color:var(--warn)}
+.step .ttl{font-weight:500;font-size:14.5px;flex:1;min-width:0}
+.step .ttl em{display:block;font-style:normal;font-size:12px;color:var(--ink-3);font-weight:400}
+.step .st{font-size:11.5px;color:var(--ink-3)}
+.step .body{padding:0 16px 16px}
+.step .body textarea{
+  width:100%;min-height:220px;border:1px solid var(--line);border-radius:var(--r-s);
+  padding:12px;background:var(--panel-2);font-size:13.5px;line-height:1.62;white-space:pre-wrap;resize:vertical;
+  font-family:inherit;
+}
+.chev{transition:transform .18s;color:var(--ink-3)}
+.step[open] .chev{transform:rotate(90deg)}
+.pulse{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
+.reveal{animation:rise .4s cubic-bezier(.2,.7,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi{border:1px solid var(--line);border-radius:14px;padding:12px 13px;background:var(--panel);position:relative}
+.kpi .k{font-size:11.5px;color:var(--ink-3);display:block;margin-bottom:2px}
+.kpi .v{font-size:21px;font-weight:500;letter-spacing:-.02em;display:flex;align-items:baseline;gap:4px}
+.kpi input{
+  border:0;background:transparent;width:100%;font-size:21px;font-weight:500;letter-spacing:-.02em;
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;padding:0;
+}
+.kpi input:focus{outline:none;border-bottom:1.5px solid var(--accent)}
+.kpi .u{font-size:12px;color:var(--ink-3);font-family:inherit}
+.kpi.tint-a{background:var(--peri-soft)} .kpi.tint-b{background:var(--mint-soft)}
+.kpi.tint-c{background:var(--apricot-soft)} .kpi.tint-d{background:var(--lilac-soft)}
+.kpi .hint{font-size:11px;color:var(--ink-3);margin-top:3px;min-height:1em}
+
+/* ---------- gauge (signature) ---------- */
+.gauge{padding:20px 18px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.gauge .bar{
+  height:44px;border-radius:12px;position:relative;margin:30px 0 8px;
+  background:linear-gradient(90deg, var(--apricot) 0%, var(--apricot) 22%, var(--sky) 45%, var(--mint) 78%, var(--mint) 100%);
+  opacity:.85;
+}
+.gauge .mark{position:absolute;top:-26px;bottom:-6px;width:2px;background:var(--ink);border-radius:2px}
+.gauge .mark span{
+  position:absolute;top:-4px;left:50%;transform:translate(-50%,-100%);white-space:nowrap;
+  font-size:11.5px;background:var(--ink);color:var(--bg);padding:2px 7px;border-radius:6px;font-weight:500;
+}
+.gauge .tick{position:absolute;top:0;bottom:0;width:1px;background:color-mix(in srgb,var(--ink) 25%, transparent)}
+.gauge .tick b{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);font-size:11px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.gauge .legend{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-3);margin-top:26px}
+.mos{display:flex;align-items:baseline;gap:10px;margin-top:14px;flex-wrap:wrap}
+.mos .big{font-size:32px;font-weight:600;letter-spacing:-.03em}
+.mos .lbl{font-size:12.5px;color:var(--ink-2)}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+
+/* ---------- table ---------- */
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th,table.t td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--line)}
+table.t th:first-child,table.t td:first-child{text-align:left;color:var(--ink-2)}
+table.t thead th{font-weight:500;font-size:11.5px;color:var(--ink-3);border-bottom:1px solid var(--line-2)}
+table.t tbody tr:last-child td{border-bottom:0}
+table.t td.v{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+
+/* ---------- misc ---------- */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:99px;font-size:12.5px;font-weight:500;border:1px solid transparent}
+.pill.buy{background:var(--mint-soft);color:var(--good);border-color:color-mix(in srgb,var(--good) 25%,transparent)}
+.pill.wait{background:var(--apricot-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 25%,transparent)}
+.pill.no{background:color-mix(in srgb,var(--bad) 10%,transparent);color:var(--bad);border-color:color-mix(in srgb,var(--bad) 25%,transparent)}
+.conv{display:flex;gap:3px;align-items:center}
+.conv i{width:9px;height:16px;border-radius:3px;background:var(--line-2);cursor:pointer}
+.conv i.on{background:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:12.5px;display:flex;gap:6px;align-items:center}
+.chip button{border:0;background:transparent;color:var(--ink-3);cursor:pointer;padding:0}
+.empty{text-align:center;padding:60px 20px;color:var(--ink-3)}
+.empty h2{color:var(--ink);font-weight:600;font-size:20px;letter-spacing:-.02em;margin:0 0 6px}
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;
+  background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:11px;font-size:13.5px;z-index:99;
+  transition:opacity .2s, transform .2s;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.split{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+.note{font-size:12px;color:var(--ink-3);line-height:1.5}
+.scn{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel)}
+.scn h4{margin:0 0 2px;font-size:13.5px;font-weight:600}
+.scn .r{font-size:26px;font-weight:600;letter-spacing:-.025em;margin:6px 0 2px}
+.scn.bear{background:var(--apricot-soft)} .scn.base{background:var(--sky-soft)} .scn.bull{background:var(--mint-soft)}
+.scn label.lab{color:var(--ink-2)}
+.scn .field{background:color-mix(in srgb,var(--panel) 60%,transparent);font-size:13px;padding:6px 8px}
+@media(max-width:1000px){
+  .app{grid-template-columns:1fr}
+  .rail{position:static;height:auto;flex-direction:row;align-items:center;overflow-x:auto;gap:12px;border-right:0;border-bottom:1px solid var(--line)}
+  .rail-label,.rail-foot .note{display:none}
+  .colist{flex-direction:row}.co{width:auto}
+  .rail-foot{margin-top:0;flex-direction:row}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .g3,.g4,.g6,.split{grid-template-columns:1fr}
+  .g2{grid-template-columns:1fr}
+  .wrap{padding:18px 16px 60px}.topbar{padding:10px 16px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ RAIL ============ -->
+  <aside class="rail">
+    <div class="brand">
+      <div class="mark"></div>
+      <div><h1>Tesis</h1><span>mesa del inversor</span></div>
+    </div>
+
+    <div>
+      <div class="rail-label" style="margin-bottom:7px">Empresas</div>
+      <div class="colist" id="colist"></div>
+      <button class="btn sm ghost" id="newCo" style="margin-top:8px;width:100%">+ Nueva empresa</button>
+    </div>
+
+    <div class="rail-foot">
+      <div class="status" id="apiStatus"><i></i><span>Modo local</span></div>
+      <button class="btn sm ghost" id="themeBtn">Cambiar tema</button>
+      <p class="note" style="padding:0 6px">Todo se guarda en este navegador.</p>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="topbar">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-tab="carga">Carga</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="metricas">Métricas</button>
+      </div>
+      <div class="grow"></div>
+      <span class="note" id="ctxName"></span>
+      <button class="btn sm" id="copyBtn">Copiar tabla</button>
+      <button class="btn sm" id="csvBtn">Descargar CSV</button>
+    </div>
+
+    <div id="noCo" class="empty hidden">
+      <h2>Todavía no hay ninguna empresa</h2>
+      <p>Creá la primera para empezar a cargar información.</p>
+      <button class="btn primary" onclick="document.getElementById('newCo').click()">Crear empresa</button>
+    </div>
+
+    <!-- ---------- TAB CARGA ---------- -->
+    <div class="wrap" id="tab-carga">
+
+      <div class="desk">
+        <h2>Traé todo lo que sepas de la empresa.</h2>
+        <p class="lede">Reportes, transcripts, capturas de pantalla, notas sueltas, links. No hace falta que esté ordenado — el orden lo pone el análisis.</p>
+
+        <div class="drop" id="drop" tabindex="0" role="button">
+          <div class="big">Soltá archivos acá o hacé clic para elegirlos</div>
+          <div class="small">PDF, TXT, MD, CSV, JSON · también podés pegar texto abajo</div>
+          <input type="file" id="fileInput" multiple class="hidden" accept=".pdf,.txt,.md,.csv,.json,.tsv">
+        </div>
+
+        <div class="cap-row">
+          <input class="field" id="urlInput" placeholder="https://… informe, nota, presentación">
+          <button class="btn" id="addUrl">Agregar link</button>
+        </div>
+
+        <div style="margin-top:8px">
+          <textarea class="field" id="textInput" placeholder="Pegá acá el transcript de la earnings call, tus notas, un extracto del 10-K…"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn" id="addText">Agregar texto</button>
+            <span class="note" id="charCount" style="align-self:center"></span>
+          </div>
+        </div>
+
+        <div class="srcs" id="srcs"></div>
+      </div>
+
+      <!-- ficha -->
+      <section class="block">
+        <h3>Ficha del activo</h3>
+        <p class="sub">Lo mínimo para que el análisis sepa de qué estamos hablando.</p>
+        <div class="card grid g4" id="ficha"></div>
+      </section>
+
+      <!-- análisis -->
+      <section class="block">
+        <h3>Recorrido del análisis</h3>
+        <p class="sub">Tres pasos del Blueprint. Podés generarlos con el modelo o escribirlos vos: el texto es editable.</p>
+
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="btn primary" id="runAll">Analizar las fuentes</button>
+          <button class="btn" id="extractBtn">Extraer métricas al tablero</button>
+          <button class="btn ghost" id="demoBtn">Cargar ejemplo (ASML)</button>
+        </div>
+
+        <div class="steps" id="steps"></div>
+      </section>
+    </div>
+
+    <!-- ---------- TAB MÉTRICAS ---------- -->
+    <div class="wrap hidden" id="tab-metricas">
+
+      <!-- cabecera decisión -->
+      <div class="card" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div class="note" id="mHead"></div>
+          <div style="font-size:23px;font-weight:600;letter-spacing:-.025em" id="mName">—</div>
+        </div>
+        <div>
+          <label class="lab">Decisión</label>
+          <select class="field" id="decision" style="width:150px">
+            <option>Comprar</option><option>Esperar</option><option>No invertir</option>
+          </select>
+        </div>
+        <div>
+          <label class="lab">Convicción <span id="convN" class="num"></span>/10</label>
+          <div class="conv" id="conv"></div>
+        </div>
+        <div><span class="pill" id="decPill">—</span></div>
+      </div>
+
+      <!-- KPIs -->
+      <section class="block">
+        <h3>Números del negocio</h3>
+        <p class="sub">Editá cualquier celda: el tablero recalcula solo.</p>
+        <div class="kpis" id="kpis"></div>
+      </section>
+
+      <!-- valoración -->
+      <section class="block">
+        <h3>Valoración</h3>
+        <p class="sub">Dos modelos: flujos descontados con múltiplo de salida a 10 años, y perpetuidad a 5 años.</p>
+
+        <div class="split">
+          <div class="gauge" id="gauge">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <div class="note">Precio hoy contra el rango de valor</div>
+              <div class="note num" id="gPrice"></div>
+            </div>
+            <div class="bar" id="gbar">
+              <div class="tick" id="tBear"><b>bear</b></div>
+              <div class="tick" id="tBase"><b>base</b></div>
+              <div class="tick" id="tBull"><b>bull</b></div>
+              <div class="mark" id="gmark"><span>hoy</span></div>
+            </div>
+            <div class="legend"><span>caro</span><span>razonable</span><span>barato</span></div>
+            <div class="mos">
+              <div class="big num" id="mosVal">—</div>
+              <div class="lbl">margen de seguridad sobre el escenario base</div>
+            </div>
+            <div class="note" id="mosNote" style="margin-top:6px"></div>
+          </div>
+
+          <div class="card">
+            <label class="lab">Supuestos del modelo</label>
+            <div class="grid g2" id="valInputs"></div>
+          </div>
+        </div>
+
+        <div class="grid g3" style="margin-top:14px" id="scns"></div>
+
+        <div class="card scroll" style="margin-top:14px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+            <strong style="font-size:13.5px;font-weight:600">Proyección del escenario base</strong>
+            <span class="note">ventas y flujo de caja libre, 10 años</span>
+          </div>
+          <table class="t" id="projTable"></table>
+        </div>
+      </section>
+
+      <!-- calidad -->
+      <section class="block">
+        <h3>Calidad del negocio</h3>
+        <p class="sub">Cada barrera de 0 a 5. Lo que no se puede defender, no se puede sostener.</p>
+        <div class="split">
+          <div class="card" id="moatInputs"></div>
+          <div class="card" style="display:grid;place-items:center"><svg id="radar" viewBox="0 0 300 260" width="100%" style="max-width:330px"></svg></div>
+        </div>
+      </section>
+
+      <!-- riesgos -->
+      <section class="block">
+        <h3>Riesgos, catalizadores y qué mira la tesis</h3>
+        <p class="sub">Un riesgo sin mecanismo causal no es un riesgo, es una palabra.</p>
+        <div class="grid g3">
+          <div class="card"><label class="lab">Riesgos con mecanismo</label><textarea class="field" id="riesgos" style="min-height:130px"></textarea></div>
+          <div class="card"><label class="lab">Catalizadores</label><textarea class="field" id="catal" style="min-height:130px"></textarea></div>
+          <div class="card"><label class="lab">Qué invalidaría la tesis</label><textarea class="field" id="invalida" style="min-height:130px"></textarea></div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h3>Tesis en una página</h3>
+        <p class="sub">Qué compro, por qué, y qué ve mal el mercado.</p>
+        <div class="card"><textarea class="field" id="tesis" style="min-height:170px" placeholder="Escribilo como se lo explicarías a alguien que te va a discutir cada frase."></textarea></div>
+      </section>
+
+      <section class="block">
+        <h3>Tabla para la planilla</h3>
+        <p class="sub">Copiá y pegá en Google Sheets: cae en columnas, sin formato raro.</p>
+        <div class="card scroll"><table class="t" id="exportTable"></table></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+/* =====================================================================
+   Tesis — mesa de trabajo del inversor
+   Frontend único. Funciona en dos modos:
+   · API   → si responde /api/health, usa el backend (OpenAI server-side)
+   · Local → sin backend: se cargan fuentes, se escribe el análisis a mano
+             y todo el motor de valoración / tablero funciona igual.
+   ===================================================================== */
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const uid = () => Math.random().toString(36).slice(2, 9);
+const clamp = (n,a,b) => Math.min(b, Math.max(a, n));
+const nz = v => (v===''||v===null||v===undefined||isNaN(+v)) ? 0 : +v;
+
+/* ---------------- persistencia ---------------- */
+const KEY = 'tesis.v1';
+let DB = { cos: [], sel: null };
+function load(){ try{ const r = localStorage.getItem(KEY); if(r) DB = JSON.parse(r); }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
+const co = () => DB.cos.find(c => c.id === DB.sel);
+
+function blank(){
+  return {
+    id: uid(),
+    ficha:{ nombre:'', ticker:'', mercado:'', industria:'', tipo:'Acción', horizonte:'Largo plazo' },
+    fuentes:[],
+    pasos:{ p1:'', p2:'', p3:'' },
+    kpi:{ ingresos:'', crecIngresos:'', mBruto:'', mOperativo:'', mNeto:'',
+          fcf:'', roic:'', roe:'', wacc:'', per:'', perHist:'', deudaNeta:'' },
+    val:{ precio:'', acciones:'', caja:'', deuda:'', ventasBase:'', margenFcf:'',
+          crec15:'', crec610:'', tasaK:'12', multiplo:'25', fclBase:'', g:'2.5' },
+    scn:{ bear:{crec15:'', margenFcf:'', multiplo:''},
+          base:{crec15:'', margenFcf:'', multiplo:''},
+          bull:{crec15:'', margenFcf:'', multiplo:''} },
+    moat:{ marca:0, red:0, switching:0, escala:0, regulacion:0, tecnologia:0 },
+    decision:'Esperar', conviccion:5,
+    riesgos:'', catal:'', invalida:'', tesis:''
+  };
+}
+
+/* ---------------- modo API ---------------- */
+let API = false;
+async function detectAPI(){
+  try{
+    const r = await fetch('/api/health', { signal: AbortSignal.timeout(2500) });
+    if(r.ok){ API = true; $('#apiStatus').classList.add('on'); $('#apiStatus').querySelector('span').textContent = 'Modelo conectado'; }
+  }catch(e){ /* modo local */ }
+}
+
+/* ---------------- toast ---------------- */
+let tT;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(tT); tT = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* =====================================================================
+   RAIL
+   ===================================================================== */
+function renderRail(){
+  const list = $('#colist'); list.innerHTML = '';
+  DB.cos.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'co'; b.setAttribute('aria-current', c.id === DB.sel);
+    const color = c.decision === 'Comprar' ? 'var(--mint)' : c.decision === 'No invertir' ? 'var(--apricot)' : 'var(--sky)';
+    b.innerHTML = `<span class="dot" style="background:${color}"></span>
+      <span class="meta"><span class="tk">${esc(c.ficha.ticker || '—')}</span>
+      <span class="nm">${esc(c.ficha.nombre || 'sin nombre')}</span></span>`;
+    b.onclick = () => { DB.sel = c.id; save(); renderAll(); };
+    list.appendChild(b);
+  });
+  $('#noCo').classList.toggle('hidden', DB.cos.length > 0);
+  $('#tab-carga').style.display = DB.cos.length ? '' : 'none';
+  if(!DB.cos.length) $('#tab-metricas').classList.add('hidden');
+}
+const esc = s => String(s ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+$('#newCo').onclick = () => {
+  const c = blank(); DB.cos.push(c); DB.sel = c.id; save(); renderAll();
+  setTimeout(()=> $('#f_nombre')?.focus(), 60);
+};
+
+/* =====================================================================
+   TAB CARGA — ficha
+   ===================================================================== */
+const FICHA = [
+  ['nombre','Empresa','text'], ['ticker','Ticker','text'],
+  ['mercado','Mercado / país','text'], ['industria','Industria','text'],
+  ['tipo','Tipo de activo','select',['Acción','ETF','Cripto','Commodity','Otro']],
+  ['horizonte','Horizonte','select',['Largo plazo','Mediano plazo','Corto plazo']]
+];
+function renderFicha(){
+  const c = co(); if(!c) return;
+  const box = $('#ficha'); box.innerHTML = '';
+  FICHA.forEach(([k,label,type,opts]) => {
+    const d = document.createElement('div');
+    if(type === 'select'){
+      d.innerHTML = `<label class="lab" for="f_${k}">${label}</label>
+        <select class="field" id="f_${k}">${opts.map(o=>`<option ${c.ficha[k]===o?'selected':''}>${o}</option>`).join('')}</select>`;
+    } else {
+      d.innerHTML = `<label class="lab" for="f_${k}">${label}</label>
+        <input class="field" id="f_${k}" value="${esc(c.ficha[k])}">`;
+    }
+    box.appendChild(d);
+    const el = d.querySelector('.field');
+    el.oninput = el.onchange = () => { c.ficha[k] = el.value; save(); renderRail(); renderCtx(); };
+  });
+}
+function renderCtx(){
+  const c = co(); if(!c) return;
+  $('#ctxName').textContent = c.ficha.ticker ? `${c.ficha.ticker} · ${c.ficha.nombre || ''}` : '';
+  $('#mName').textContent = c.ficha.nombre || c.ficha.ticker || 'Sin nombre';
+  $('#mHead').textContent = [c.ficha.ticker, c.ficha.mercado, c.ficha.industria, c.ficha.horizonte].filter(Boolean).join(' · ');
+}
+
+/* =====================================================================
+   TAB CARGA — captura de fuentes
+   ===================================================================== */
+const drop = $('#drop'), fileInput = $('#fileInput');
+drop.onclick = () => fileInput.click();
+drop.onkeydown = e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fileInput.click(); } };
+['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+fileInput.onchange = () => { handleFiles(fileInput.files); fileInput.value=''; };
+
+async function handleFiles(files){
+  const c = co(); if(!c){ toast('Creá una empresa primero'); return; }
+  for(const f of files){
+    let texto = '', tipo = f.name.split('.').pop().toLowerCase();
+    try{
+      if(tipo === 'pdf'){ texto = await readPDF(f); }
+      else { texto = await f.text(); }
+    }catch(err){ texto = ''; toast(`No se pudo leer ${f.name}`); }
+    c.fuentes.push({ id: uid(), tipo: tipo.toUpperCase(), nombre: f.name, texto, chars: texto.length });
+  }
+  save(); renderSrcs();
+}
+async function readPDF(file){
+  if(!window.pdfjsLib) throw new Error('sin pdfjs');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  let out = '';
+  for(let i=1; i<=pdf.numPages; i++){
+    const page = await pdf.getPage(i);
+    const tc = await page.getTextContent();
+    out += tc.items.map(it => it.str).join(' ') + '\n\n';
+  }
+  return out.trim();
+}
+
+$('#addUrl').onclick = async () => {
+  const c = co(); if(!c){ toast('Creá una empresa primero'); return; }
+  const u = $('#urlInput').value.trim(); if(!u) return;
+  let texto = '', nombre = u;
+  if(API){
+    try{
+      const r = await fetch('/api/fetch', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})});
+      const j = await r.json(); texto = j.text || ''; nombre = j.title || u;
+    }catch(e){ toast('No se pudo leer el link, quedó guardado igual'); }
+  }
+  c.fuentes.push({ id: uid(), tipo:'URL', nombre, url:u, texto, chars: texto.length });
+  $('#urlInput').value = ''; save(); renderSrcs();
+};
+
+$('#addText').onclick = () => {
+  const c = co(); if(!c){ toast('Creá una empresa primero'); return; }
+  const t = $('#textInput').value.trim(); if(!t) return;
+  const first = t.split('\n')[0].slice(0, 46);
+  c.fuentes.push({ id: uid(), tipo:'TEXTO', nombre: first || 'Nota pegada', texto: t, chars: t.length });
+  $('#textInput').value = ''; $('#charCount').textContent = ''; save(); renderSrcs();
+};
+$('#textInput').oninput = e => {
+  const n = e.target.value.length;
+  $('#charCount').textContent = n ? `${n.toLocaleString('es-AR')} caracteres` : '';
+};
+
+function renderSrcs(){
+  const c = co(); if(!c) return;
+  const box = $('#srcs'); box.innerHTML = '';
+  if(!c.fuentes.length){
+    box.innerHTML = `<span class="note">Todavía no cargaste nada. El análisis necesita al menos una fuente.</span>`;
+    return;
+  }
+  c.fuentes.forEach(f => {
+    const el = document.createElement('span');
+    el.className = 'src';
+    const ok = f.chars > 40;
+    el.innerHTML = `<span class="ck" style="background:${ok?'var(--mint)':'var(--apricot)'}">
+        <svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2 4.6 9 10 3.2" stroke="#0d3d2b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="tag">${esc(f.tipo)}</span><b>${esc(f.nombre)}</b>
+      <span class="note num">${ok ? (f.chars>999 ? (f.chars/1000).toFixed(1)+'k' : f.chars) : 'sin texto'}</span>
+      <button class="x" title="Quitar">×</button>`;
+    el.querySelector('.x').onclick = () => { c.fuentes = c.fuentes.filter(x=>x.id!==f.id); save(); renderSrcs(); };
+    box.appendChild(el);
+  });
+  const total = c.fuentes.reduce((a,b)=>a+b.chars,0);
+  const s = document.createElement('span');
+  s.className = 'note'; s.style.alignSelf='center';
+  s.textContent = `${c.fuentes.length} fuentes · ${(total/1000).toFixed(1)}k caracteres listos`;
+  box.appendChild(s);
+}
+
+/* =====================================================================
+   TAB CARGA — los tres pasos
+   ===================================================================== */
+const PASOS = [
+  { k:'p1', n:1, t:'Entender el negocio', s:'Qué vende, a quién, qué problema resuelve, cómo gana plata y qué lo hace difícil de copiar.' },
+  { k:'p2', n:2, t:'Los números y su historia', s:'Ingresos, márgenes, caja, deuda, retornos sobre capital y qué cambió de verdad en los últimos años.' },
+  { k:'p3', n:3, t:'Análisis técnico del negocio', s:'Motor del crecimiento, unit economics, asignación de capital, riesgo de disrupción y qué descuenta el precio.' }
+];
+function renderSteps(){
+  const c = co(); if(!c) return;
+  const box = $('#steps'); box.innerHTML = '';
+  PASOS.forEach(p => {
+    const d = document.createElement('details');
+    d.className = 'step'; d.open = !!c.pasos[p.k];
+    const done = !!c.pasos[p.k];
+    d.innerHTML = `
+      <summary>
+        <span class="idx">${p.n}</span>
+        <span class="ttl">${p.t}<em>${p.s}</em></span>
+        <span class="st" data-st>${done ? (c.pasos[p.k].length>999?(c.pasos[p.k].length/1000).toFixed(1)+'k car.':c.pasos[p.k].length+' car.') : 'vacío'}</span>
+        <svg class="chev" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="body">
+        <textarea placeholder="Generá el paso con el modelo, o escribilo vos.">${esc(c.pasos[p.k])}</textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn sm" data-run>Generar este paso</button>
+        </div>
+      </div>`;
+    const ta = d.querySelector('textarea');
+    ta.oninput = () => { c.pasos[p.k] = ta.value; save(); d.querySelector('[data-st]').textContent = ta.value.length + ' car.'; };
+    d.querySelector('[data-run]').onclick = () => runStep(p.k);
+    box.appendChild(d);
+  });
+}
+
+function fuentesTexto(c, limit = 90000){
+  let out = '';
+  for(const f of c.fuentes){
+    if(!f.texto) continue;
+    out += `\n\n### FUENTE: ${f.nombre} (${f.tipo})\n${f.texto}`;
+    if(out.length > limit) break;
+  }
+  return out.slice(0, limit);
+}
+
+async function runStep(k){
+  const c = co(); if(!c) return;
+  if(!c.fuentes.some(f=>f.texto)){ toast('Cargá al menos una fuente con texto'); return; }
+  if(!API){ toast('Sin backend conectado: escribí el paso a mano o desplegá el servidor'); return; }
+  const idx = PASOS.findIndex(p=>p.k===k);
+  const det = $$('#steps .step')[idx]; const st = det.querySelector('[data-st]');
+  st.textContent = 'pensando…'; st.classList.add('pulse'); det.open = true;
+  try{
+    const r = await fetch('/api/analyze', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ paso:k, ficha:c.ficha, previo:c.pasos, fuentes: fuentesTexto(c) })
+    });
+    const j = await r.json();
+    if(j.error) throw new Error(j.error);
+    c.pasos[k] = j.texto || ''; save();
+    det.querySelector('textarea').value = c.pasos[k];
+    st.textContent = c.pasos[k].length + ' car.';
+    det.classList.add('reveal');
+  }catch(e){ st.textContent = 'falló'; toast('El modelo no respondió: ' + e.message); }
+  finally{ st.classList.remove('pulse'); }
+}
+
+$('#runAll').onclick = async () => {
+  const c = co(); if(!c) return;
+  if(!API){ toast('Sin backend: usá el ejemplo o escribí los pasos a mano'); return; }
+  $('#runAll').disabled = true; $('#runAll').textContent = 'Analizando…';
+  for(const p of PASOS){ await runStep(p.k); }
+  $('#runAll').disabled = false; $('#runAll').textContent = 'Analizar las fuentes';
+  toast('Análisis listo');
+};
+
+$('#extractBtn').onclick = async () => {
+  const c = co(); if(!c) return;
+  const texto = [c.pasos.p1, c.pasos.p2, c.pasos.p3].join('\n\n');
+  if(texto.trim().length < 100){ toast('Primero generá o escribí el análisis'); return; }
+  if(!API){ toast('Sin backend: cargá los números a mano en Métricas'); go('metricas'); return; }
+  $('#extractBtn').disabled = true; $('#extractBtn').textContent = 'Extrayendo…';
+  try{
+    const r = await fetch('/api/extract', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ ficha:c.ficha, analisis: texto }) });
+    const j = await r.json();
+    if(j.error) throw new Error(j.error);
+    Object.assign(c.kpi, cleanObj(j.kpi));
+    Object.assign(c.val, cleanObj(j.val));
+    if(j.moat) Object.assign(c.moat, j.moat);
+    if(j.scn) ['bear','base','bull'].forEach(s => j.scn[s] && Object.assign(c.scn[s], cleanObj(j.scn[s])));
+    if(j.riesgos) c.riesgos = j.riesgos;
+    if(j.catal) c.catal = j.catal;
+    if(j.invalida) c.invalida = j.invalida;
+    if(j.tesis) c.tesis = j.tesis;
+    if(j.decision) c.decision = j.decision;
+    if(j.conviccion) c.conviccion = j.conviccion;
+    save(); renderMetricas(); go('metricas'); toast('Métricas cargadas al tablero');
+  }catch(e){ toast('No se pudieron extraer: ' + e.message); }
+  finally{ $('#extractBtn').disabled = false; $('#extractBtn').textContent = 'Extraer métricas al tablero'; }
+};
+function cleanObj(o){ const r = {}; for(const k in (o||{})) if(o[k] !== null && o[k] !== '') r[k] = String(o[k]); return r; }
+
+/* =====================================================================
+   TAB MÉTRICAS — KPIs
+   ===================================================================== */
+const KPIS = [
+  ['ingresos','Ingresos TTM','M$','tint-a'], ['crecIngresos','Crecimiento ingresos','%','tint-a'],
+  ['mBruto','Margen bruto','%','tint-b'], ['mOperativo','Margen operativo','%','tint-b'],
+  ['mNeto','Margen neto','%','tint-b'], ['fcf','Free cash flow','M$','tint-c'],
+  ['roic','ROIC','%','tint-d'], ['roe','ROE','%','tint-d'],
+  ['wacc','WACC','%','tint-d'], ['per','PER actual','x',''],
+  ['perHist','PER promedio histórico','x',''], ['deudaNeta','Deuda neta','M$','']
+];
+function renderKPIs(){
+  const c = co(); if(!c) return;
+  const box = $('#kpis'); box.innerHTML = '';
+  KPIS.forEach(([k,label,unit,tint]) => {
+    const d = document.createElement('div');
+    d.className = 'kpi ' + tint;
+    d.innerHTML = `<span class="k">${label}</span>
+      <div class="v"><input class="num" id="k_${k}" value="${esc(c.kpi[k])}" placeholder="—" inputmode="decimal"><span class="u">${unit}</span></div>
+      <div class="hint" data-hint></div>`;
+    box.appendChild(d);
+    const inp = d.querySelector('input');
+    inp.oninput = () => { c.kpi[k] = inp.value; save(); hints(); renderExport(); };
+  });
+  hints();
+}
+function hints(){
+  const c = co(); if(!c) return;
+  const H = {
+    roic: () => { const s = nz(c.kpi.roic) - nz(c.kpi.wacc); if(!nz(c.kpi.roic)||!nz(c.kpi.wacc)) return '';
+      return s > 0 ? `crea valor · spread +${s.toFixed(1)} pts` : `destruye valor · spread ${s.toFixed(1)} pts`; },
+    per: () => { const a = nz(c.kpi.per), h = nz(c.kpi.perHist); if(!a||!h) return '';
+      const d = (a/h-1)*100; return d > 0 ? `${d.toFixed(0)}% sobre su historia` : `${Math.abs(d).toFixed(0)}% bajo su historia`; },
+    mOperativo: () => { const b = nz(c.kpi.mBruto), o = nz(c.kpi.mOperativo); if(!b||!o) return '';
+      return `${(o/b*100).toFixed(0)}% del bruto llega a operativo`; },
+    fcf: () => { const f = nz(c.kpi.fcf), i = nz(c.kpi.ingresos); if(!f||!i) return '';
+      return `${(f/i*100).toFixed(1)}% de las ventas se vuelven caja`; }
+  };
+  KPIS.forEach(([k]) => {
+    const el = $(`#k_${k}`)?.closest('.kpi')?.querySelector('[data-hint]');
+    if(!el) return;
+    const txt = H[k] ? H[k]() : '';
+    el.textContent = txt;
+    el.style.color = /destruye|sobre su historia/.test(txt) ? 'var(--warn)' : 'var(--ink-3)';
+  });
+}
+
+/* =====================================================================
+   TAB MÉTRICAS — motor de valoración
+   ===================================================================== */
+const VAL_INPUTS = [
+  ['precio','Precio hoy','$'], ['acciones','Acciones en circulación','M'],
+  ['caja','Caja y equivalentes','M$'], ['deuda','Deuda total','M$'],
+  ['ventasBase','Ventas año 1 estimadas','M$'], ['margenFcf','Margen FCF / ventas','%'],
+  ['crec15','Crecimiento ventas años 1–5','%'], ['crec610','Crecimiento ventas años 6–10','%'],
+  ['tasaK','Tasa de descuento K','%'], ['multiplo','Múltiplo de salida EV/FCF','x'],
+  ['fclBase','FCL base (perpetuidad)','M$'], ['g','Crecimiento perpetuo g','%']
+];
+function renderValInputs(){
+  const c = co(); if(!c) return;
+  const box = $('#valInputs'); box.innerHTML = '';
+  VAL_INPUTS.forEach(([k,label,u]) => {
+    const d = document.createElement('div');
+    d.innerHTML = `<label class="lab" for="v_${k}">${label} <span style="color:var(--ink-3)">${u}</span></label>
+      <input class="field num" id="v_${k}" value="${esc(c.val[k])}" inputmode="decimal" placeholder="—">`;
+    box.appendChild(d);
+    d.querySelector('input').oninput = e => { c.val[k] = e.target.value; save(); renderValuation(); renderExport(); };
+  });
+}
+
+/* Modelo A · flujos 10 años + múltiplo de salida (el del Excel base) */
+function modeloMultiplo(v, ov = {}){
+  const ventas0 = nz(v.ventasBase);
+  const m   = nz(ov.margenFcf ?? v.margenFcf) / 100;
+  const g15 = nz(ov.crec15   ?? v.crec15) / 100;
+  const g610= nz(ov.crec610  ?? v.crec610 ?? v.crec15) / 100;
+  const K   = nz(v.tasaK) / 100;
+  const mult= nz(ov.multiplo ?? v.multiplo);
+  if(!ventas0 || !m || !K) return null;
+
+  const rows = []; let ventas = ventas0, vpFcf = 0;
+  for(let t = 1; t <= 10; t++){
+    if(t > 1) ventas *= (1 + (t <= 5 ? g15 : g610));
+    const fcf = ventas * m;
+    const df = Math.pow(1 + K, t);
+    const vp = fcf / df;
+    vpFcf += vp;
+    rows.push({ t, ventas, fcf, df, vp });
+  }
+  const fcfFinal = rows[9].fcf;
+  const evTerm = fcfFinal * mult;
+  const vpTerm = evTerm / Math.pow(1 + K, 10);
+  const ev = vpFcf + vpTerm;
+  const equity = ev + nz(v.caja) - nz(v.deuda);
+  const acc = nz(v.acciones);
+  return { rows, vpFcf, evTerm, vpTerm, ev, equity, porAccion: acc ? equity / acc : 0 };
+}
+
+/* Modelo B · 5 años + perpetuidad de Gordon */
+function modeloGordon(v){
+  const fcl = nz(v.fclBase), w = nz(v.tasaK)/100, g = nz(v.g)/100, gr = nz(v.crec15)/100;
+  if(!fcl || !w || w <= g) return null;
+  let f = fcl, vp = 0, rows = [];
+  for(let t = 1; t <= 5; t++){
+    f *= (1 + gr);
+    const d = Math.pow(1 + w, t);
+    vp += f / d; rows.push({t, f, vp: f/d});
+  }
+  const vt = f * (1 + g) / (w - g);
+  const vpVt = vt / Math.pow(1 + w, 5);
+  const ev = vp + vpVt;
+  const equity = ev + nz(v.caja) - nz(v.deuda);
+  const acc = nz(v.acciones);
+  return { ev, vt, equity, porAccion: acc ? equity / acc : 0 };
+}
+
+const SCN = [
+  ['bear','Pesimista','Qué pasa si el crecimiento se corta y el mercado paga menos.'],
+  ['base','Base','Lo que realmente esperás que ocurra.'],
+  ['bull','Optimista','Todo lo que tiene que salir bien para justificar el entusiasmo.']
+];
+function renderScns(){
+  const c = co(); if(!c) return;
+  const box = $('#scns'); box.innerHTML = '';
+  SCN.forEach(([k,t,s]) => {
+    const d = document.createElement('div');
+    d.className = 'scn ' + k;
+    d.innerHTML = `<h4>${t}</h4><div class="note">${s}</div>
+      <div class="r num" data-r>—</div><div class="note" data-sub></div>
+      <div class="grid g3" style="margin-top:10px">
+        <div><label class="lab">Crec. %</label><input class="field num" data-f="crec15" value="${esc(c.scn[k].crec15)}" inputmode="decimal" placeholder="${esc(c.val.crec15)||'—'}"></div>
+        <div><label class="lab">Margen FCF %</label><input class="field num" data-f="margenFcf" value="${esc(c.scn[k].margenFcf)}" inputmode="decimal" placeholder="${esc(c.val.margenFcf)||'—'}"></div>
+        <div><label class="lab">Múltiplo x</label><input class="field num" data-f="multiplo" value="${esc(c.scn[k].multiplo)}" inputmode="decimal" placeholder="${esc(c.val.multiplo)||'—'}"></div>
+      </div>`;
+    d.querySelectorAll('input').forEach(inp => {
+      inp.oninput = () => { c.scn[k][inp.dataset.f] = inp.value; save(); renderValuation(); renderExport(); };
+    });
+    box.appendChild(d);
+  });
+}
+
+function scnResult(c, k){
+  const s = c.scn[k];
+  const ov = {};
+  if(s.crec15 !== '') ov.crec15 = s.crec15;
+  if(s.margenFcf !== '') ov.margenFcf = s.margenFcf;
+  if(s.multiplo !== '') ov.multiplo = s.multiplo;
+  return modeloMultiplo(c.val, ov);
+}
+
+function fmt(n, d = 2){
+  if(n === null || n === undefined || !isFinite(n)) return '—';
+  return n.toLocaleString('es-AR', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function fmtM(n){
+  if(!isFinite(n)) return '—';
+  const a = Math.abs(n);
+  if(a >= 1e6) return (n/1e6).toFixed(2) + 'B';
+  if(a >= 1e3) return (n/1e3).toFixed(1) + 'k';
+  return n.toFixed(0);
+}
+
+function renderValuation(){
+  const c = co(); if(!c) return;
+  const precio = nz(c.val.precio);
+  const res = { bear: scnResult(c,'bear'), base: scnResult(c,'base'), bull: scnResult(c,'bull') };
+
+  SCN.forEach(([k], i) => {
+    const card = $('#scns').children[i];
+    const r = res[k];
+    const rEl = card.querySelector('[data-r]'), sEl = card.querySelector('[data-sub]');
+    if(!r || !r.porAccion){ rEl.textContent = '—'; sEl.textContent = 'faltan supuestos'; return; }
+    rEl.textContent = '$' + fmt(r.porAccion, 2);
+    if(precio){
+      const up = (r.porAccion / precio - 1) * 100;
+      sEl.innerHTML = `<span class="${up>=0?'pos':'neg'}">${up>=0?'+':''}${up.toFixed(1)}%</span> contra el precio de hoy`;
+    } else sEl.textContent = 'valor por acción';
+  });
+
+  // gauge
+  const vals = ['bear','base','bull'].map(k => res[k]?.porAccion).filter(v => v && isFinite(v));
+  const bar = $('#gbar');
+  const marks = { tBear: res.bear?.porAccion, tBase: res.base?.porAccion, tBull: res.bull?.porAccion };
+  $('#gPrice').textContent = precio ? '$' + fmt(precio, 2) : '';
+  if(vals.length && precio){
+    const lo = Math.min(precio, ...vals) * 0.85, hi = Math.max(precio, ...vals) * 1.1;
+    const pct = x => clamp((x - lo) / (hi - lo) * 100, 0, 100);
+    for(const id in marks){
+      const el = $('#' + id);
+      if(marks[id]){ el.style.display=''; el.style.left = pct(marks[id]) + '%'; el.querySelector('b').textContent = `${id.slice(1).toLowerCase()} $${fmt(marks[id],0)}`; }
+      else el.style.display = 'none';
+    }
+    $('#gmark').style.display = ''; $('#gmark').style.left = pct(precio) + '%';
+    const b = res.base?.porAccion;
+    if(b){
+      const mos = (1 - precio / b) * 100;
+      const el = $('#mosVal');
+      el.textContent = (mos >= 0 ? '+' : '') + mos.toFixed(1) + '%';
+      el.className = 'big num ' + (mos >= 0 ? 'pos' : 'neg');
+      $('#mosNote').textContent = mos >= 25 ? 'Descuento amplio: el precio no exige que todo salga bien.'
+        : mos >= 0 ? 'Descuento chico: el margen de error es acotado.'
+        : 'El precio ya paga más de lo que el escenario base justifica.';
+    }
+  } else {
+    ['tBear','tBase','tBull','gmark'].forEach(id => $('#'+id).style.display = 'none');
+    $('#mosVal').textContent = '—'; $('#mosVal').className = 'big num';
+    $('#mosNote').textContent = 'Cargá precio, ventas, margen FCF y tasa para ver el rango.';
+  }
+
+  // tabla proyección
+  const b = res.base;
+  const T = $('#projTable');
+  if(b){
+    const yr = new Date().getFullYear();
+    T.innerHTML = `<thead><tr><th>Concepto</th>${b.rows.map(r=>`<th>${yr + r.t}</th>`).join('')}</tr></thead>
+      <tbody>
+        <tr><td>Ventas</td>${b.rows.map(r=>`<td class="v">${fmtM(r.ventas)}</td>`).join('')}</tr>
+        <tr><td>Free cash flow</td>${b.rows.map(r=>`<td class="v">${fmtM(r.fcf)}</td>`).join('')}</tr>
+        <tr><td>Factor de descuento</td>${b.rows.map(r=>`<td class="v">${r.df.toFixed(2)}</td>`).join('')}</tr>
+        <tr><td>Valor presente</td>${b.rows.map(r=>`<td class="v">${fmtM(r.vp)}</td>`).join('')}</tr>
+      </tbody>`;
+  } else T.innerHTML = `<tbody><tr><td class="note">Cargá los supuestos para ver la proyección.</td></tr></tbody>`;
+  return res;
+}
+
+/* =====================================================================
+   TAB MÉTRICAS — moat + radar
+   ===================================================================== */
+const MOAT = [
+  ['marca','Marca'], ['red','Efectos de red'], ['switching','Costos de cambio'],
+  ['escala','Economías de escala'], ['regulacion','Regulación / licencias'], ['tecnologia','Patentes / tecnología']
+];
+function renderMoat(){
+  const c = co(); if(!c) return;
+  const box = $('#moatInputs'); box.innerHTML = '';
+  MOAT.forEach(([k,label]) => {
+    const d = document.createElement('div');
+    d.style.cssText = 'display:flex;align-items:center;gap:12px;padding:7px 0';
+    d.innerHTML = `<span style="flex:1;font-size:13.5px">${label}</span>
+      <input type="range" min="0" max="5" step="1" value="${c.moat[k]}" style="width:150px;accent-color:var(--accent)">
+      <b class="num" style="width:14px;text-align:right;font-weight:500">${c.moat[k]}</b>`;
+    const r = d.querySelector('input'), b = d.querySelector('b');
+    r.oninput = () => { c.moat[k] = +r.value; b.textContent = r.value; save(); drawRadar(); renderExport(); };
+    box.appendChild(d);
+  });
+  const s = document.createElement('div');
+  s.className = 'note'; s.style.marginTop = '10px';
+  s.textContent = 'La pregunta no es qué ventaja dice tener, sino qué te frenaría si quisieras robarle el negocio con mil millones en la mano.';
+  box.appendChild(s);
+  drawRadar();
+}
+function drawRadar(){
+  const c = co(); if(!c) return;
+  const svg = $('#radar'), cx = 150, cy = 128, R = 92, n = MOAT.length;
+  const pt = (i, r) => {
+    const a = -Math.PI/2 + i * 2*Math.PI/n;
+    return [cx + Math.cos(a)*r, cy + Math.sin(a)*r];
+  };
+  let g = '';
+  for(let ring = 1; ring <= 5; ring++){
+    const p = Array.from({length:n}, (_,i) => pt(i, R*ring/5).map(v=>v.toFixed(1)).join(',')).join(' ');
+    g += `<polygon points="${p}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
+  }
+  for(let i=0;i<n;i++){ const [x,y]=pt(i,R); g += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`; }
+  const data = MOAT.map(([k],i) => pt(i, R * (c.moat[k]/5)).map(v=>v.toFixed(1)).join(','));
+  g += `<polygon points="${data.join(' ')}" fill="var(--accent)" fill-opacity=".16" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
+  MOAT.forEach(([k],i) => { const [x,y] = pt(i, R*(c.moat[k]/5)); g += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2" fill="var(--accent)"/>`; });
+  MOAT.forEach(([k,label],i) => {
+    const [x,y] = pt(i, R + 22);
+    const anchor = x < cx - 6 ? 'end' : x > cx + 6 ? 'start' : 'middle';
+    g += `<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${anchor}" font-size="11" fill="var(--ink-2)" font-family="Bricolage Grotesque,sans-serif">${label}</text>`;
+  });
+  const score = MOAT.reduce((a,[k])=>a+c.moat[k],0);
+  g += `<text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="13" fill="var(--ink-3)" font-family="IBM Plex Mono,monospace">${score}/30</text>`;
+  svg.innerHTML = g;
+}
+
+/* =====================================================================
+   TAB MÉTRICAS — decisión, textos
+   ===================================================================== */
+function renderDecision(){
+  const c = co(); if(!c) return;
+  $('#decision').value = c.decision;
+  $('#decision').onchange = e => { c.decision = e.target.value; save(); pill(); renderRail(); renderExport(); };
+  const box = $('#conv'); box.innerHTML = '';
+  for(let i=1;i<=10;i++){
+    const el = document.createElement('i');
+    el.className = i <= c.conviccion ? 'on' : '';
+    el.title = i;
+    el.onclick = () => { c.conviccion = i; save(); renderDecision(); renderExport(); };
+    box.appendChild(el);
+  }
+  $('#convN').textContent = c.conviccion;
+  pill();
+  [['riesgos','riesgos'],['catal','catal'],['invalida','invalida'],['tesis','tesis']].forEach(([id,k]) => {
+    const el = $('#'+id); el.value = c[k] || '';
+    el.oninput = () => { c[k] = el.value; save(); renderExport(); };
+  });
+}
+function pill(){
+  const c = co(); if(!c) return;
+  const p = $('#decPill');
+  p.textContent = c.decision;
+  p.className = 'pill ' + (c.decision === 'Comprar' ? 'buy' : c.decision === 'Esperar' ? 'wait' : 'no');
+}
+
+/* =====================================================================
+   EXPORTACIÓN
+   ===================================================================== */
+function exportRows(){
+  const c = co(); if(!c) return [];
+  const res = { bear: scnResult(c,'bear'), base: scnResult(c,'base'), bull: scnResult(c,'bull') };
+  const g = modeloGordon(c.val);
+  const precio = nz(c.val.precio);
+  const up = r => (r && r.porAccion && precio) ? ((r.porAccion/precio - 1)*100).toFixed(1) + '%' : '';
+  const moatScore = MOAT.reduce((a,[k])=>a+c.moat[k],0);
+  const R = [];
+  const add = (sec, k, v) => R.push([sec, k, v ?? '']);
+  add('Ficha','Empresa',c.ficha.nombre); add('Ficha','Ticker',c.ficha.ticker);
+  add('Ficha','Mercado',c.ficha.mercado); add('Ficha','Industria',c.ficha.industria);
+  add('Ficha','Tipo',c.ficha.tipo); add('Ficha','Horizonte',c.ficha.horizonte);
+  KPIS.forEach(([k,label,u]) => add('Números', label + (u?` (${u})`:''), c.kpi[k]));
+  const spread = (nz(c.kpi.roic) && nz(c.kpi.wacc)) ? (nz(c.kpi.roic)-nz(c.kpi.wacc)).toFixed(1) : '';
+  add('Números','Spread ROIC - WACC (pts)', spread);
+  add('Números','¿Crea valor?', spread === '' ? '' : (+spread > 0 ? 'Sí' : 'No'));
+  VAL_INPUTS.forEach(([k,label,u]) => add('Supuestos', label + (u?` (${u})`:''), c.val[k]));
+  ['bear','base','bull'].forEach((k,i) => {
+    const nm = SCN[i][1];
+    add('Valoración', `Valor por acción · ${nm}`, res[k]?.porAccion ? res[k].porAccion.toFixed(2) : '');
+    add('Valoración', `Retorno implícito · ${nm}`, up(res[k]));
+  });
+  add('Valoración','Valor por acción · perpetuidad', g?.porAccion ? g.porAccion.toFixed(2) : '');
+  const mos = (res.base?.porAccion && precio) ? ((1 - precio/res.base.porAccion)*100).toFixed(1)+'%' : '';
+  add('Valoración','Margen de seguridad (base)', mos);
+  MOAT.forEach(([k,label]) => add('Moat', label + ' (0-5)', c.moat[k]));
+  add('Moat','Puntaje total (0-30)', moatScore);
+  add('Decisión','Decisión', c.decision);
+  add('Decisión','Convicción (1-10)', c.conviccion);
+  add('Decisión','Riesgos', oneLine(c.riesgos));
+  add('Decisión','Catalizadores', oneLine(c.catal));
+  add('Decisión','Qué invalida la tesis', oneLine(c.invalida));
+  add('Decisión','Tesis', oneLine(c.tesis));
+  add('Meta','Actualizado', new Date().toLocaleDateString('es-AR'));
+  return R;
+}
+const oneLine = s => String(s||'').replace(/\s*\n+\s*/g, ' · ').replace(/\t/g,' ').trim();
+
+function renderExport(){
+  const rows = exportRows();
+  const T = $('#exportTable');
+  T.innerHTML = `<thead><tr><th>Bloque</th><th style="text-align:left">Métrica</th><th>Valor</th></tr></thead><tbody>` +
+    rows.map(r => `<tr><td>${esc(r[0])}</td><td style="text-align:left;color:var(--ink)">${esc(r[1])}</td><td class="v">${esc(String(r[2]).slice(0,120))}</td></tr>`).join('') +
+    `</tbody>`;
+}
+function tsv(){
+  const c = co();
+  return ['Bloque\tMétrica\tValor', ...exportRows().map(r => r.map(x => String(x??'').replace(/\t|\n/g,' ')).join('\t'))].join('\n');
+}
+$('#copyBtn').onclick = async () => {
+  if(!co()) return;
+  try{ await navigator.clipboard.writeText(tsv()); toast('Copiado. Pegalo en Google Sheets con Ctrl+V'); }
+  catch(e){ toast('El navegador bloqueó el portapapeles: usá Descargar CSV'); }
+};
+$('#csvBtn').onclick = () => {
+  const c = co(); if(!c) return;
+  const csv = ['Bloque,Métrica,Valor', ...exportRows().map(r => r.map(x => `"${String(x??'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'}));
+  a.download = `tesis-${(c.ficha.ticker||'empresa').toLowerCase()}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
+};
+
+/* =====================================================================
+   TABS
+   ===================================================================== */
+function go(t){
+  $$('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
+  $('#tab-carga').classList.toggle('hidden', t !== 'carga');
+  $('#tab-metricas').classList.toggle('hidden', t !== 'metricas');
+  if(t === 'metricas') renderMetricas();
+  window.scrollTo({top:0});
+}
+$$('.tab').forEach(b => b.onclick = () => go(b.dataset.tab));
+
+/* =====================================================================
+   EJEMPLO
+   ===================================================================== */
+$('#demoBtn').onclick = () => {
+  let c = co();
+  if(!c){ c = blank(); DB.cos.push(c); DB.sel = c.id; }
+  Object.assign(c.ficha, { nombre:'ASML Holding', ticker:'ASML', mercado:'Euronext / Nasdaq', industria:'Equipamiento de semiconductores', tipo:'Acción', horizonte:'Largo plazo' });
+  c.fuentes = [
+    { id:uid(), tipo:'PDF', nombre:'ASML Annual Report 2025.pdf', texto:'(ejemplo)'.repeat(400), chars:4000 },
+    { id:uid(), tipo:'TEXTO', nombre:'Transcript Q4 earnings call', texto:'(ejemplo)'.repeat(900), chars:9000 },
+    { id:uid(), tipo:'URL', nombre:'Investor presentation', url:'https://', texto:'(ejemplo)'.repeat(200), chars:2000 }
+  ];
+  c.pasos.p1 = `QUÉ VENDE
+ASML fabrica las máquinas de litografía que imprimen los circuitos sobre las obleas de silicio. Es el único proveedor del mundo de litografía EUV, la tecnología necesaria para los nodos más avanzados.
+
+CLIENTE
+Tres clientes explican la mayor parte del negocio: TSMC, Samsung e Intel. Concentración altísima, pero del lado correcto: son ellos los que compiten por conseguir las máquinas, no ASML por venderlas.
+
+CÓMO GANA PLATA
+Dos motores. Venta de sistemas, que es lumpy y depende del ciclo de capex de las foundries. Y una base instalada creciente que genera servicio, upgrades y repuestos: ingreso recurrente, margen alto y mucho menos cíclico.
+
+POR QUÉ ES DIFÍCIL DE COPIAR
+No es una patente, es una cadena de suministro de treinta años. Requiere las ópticas de Zeiss, una fuente de luz de plasma de estaño, y sobre todo el aprendizaje acumulado de instalar y mantener estas máquinas en fábricas reales. Un competidor con capital ilimitado necesitaría más de una década.`;
+  c.pasos.p2 = `INGRESOS
+Diez años de historia: de ~$7.2B a ~$38.4B. Compuesto cercano al 20% anual, pero con dos años de caída en el medio. No es un negocio suave, es un negocio bueno con forma cíclica.
+
+MÁRGENES
+Bruto en torno al 51-53% y subiendo con el mix EUV/High-NA. Operativo cerca del 32%. La mejora no vino de recortar costos sino de vender máquinas más caras a clientes que no tienen alternativa.
+
+CAJA
+FCF muy volátil año a año — de $3.6B en un año flojo a $13B en uno bueno — porque el capital de trabajo se mueve con los pagos anticipados de clientes. La rentabilidad FCF/ventas promedia cerca de 27% en la década.
+
+BALANCE
+Caja de ~$7.9B contra deuda de ~$5.4B: posición neta de caja. Nada de fragilidad financiera.
+
+RETORNOS
+ROIC muy por encima del costo de capital de forma sostenida. El spread no es un año bueno, es la característica estructural del negocio.`;
+  c.pasos.p3 = `MOTOR DEL CRECIMIENTO
+No es volumen de unidades, es precio y mix. Cada generación de máquina es más cara que la anterior y el cliente la necesita más. Ese es el crecimiento sano: no requiere capital proporcional.
+
+UNIT ECONOMICS
+El dólar incremental de ingresos llega con margen incremental superior al promedio, porque el costo fijo de I+D ya está pagado. La base instalada agrega servicio de alto margen sin capex nuevo.
+
+ASIGNACIÓN DE CAPITAL
+Reinversión fuerte en I+D — correcto, es lo que sostiene el monopolio. Recompras que históricamente se hicieron con criterio. Dividendo creciente pero no comprometedor. Sin adquisiciones grandes que destruyan valor.
+
+RIESGO DE DISRUPCIÓN
+El riesgo no es que aparezca un competidor con EUV. Es que la industria encuentre otro camino: chiplets, apilado 3D, materiales nuevos, o que la demanda de nodos avanzados se sature. También el riesgo político: las restricciones de exportación a China son una variable exógena que ASML no controla.
+
+QUÉ DESCUENTA EL PRECIO
+A los múltiplos actuales el mercado ya paga por una década de crecimiento sostenido y sin interrupciones políticas. La discusión no es si el negocio es extraordinario — lo es — sino cuánto de ese futuro ya está en el precio.`;
+  Object.assign(c.kpi, { ingresos:'38371', crecIngresos:'31.1', mBruto:'51.9', mOperativo:'32.4', mNeto:'27.1', fcf:'13022', roic:'28', roe:'42', wacc:'9.3', per:'34', perHist:'31', deudaNeta:'-2511' });
+  Object.assign(c.val, { precio:'1714.88', acciones:'384.1', caja:'7912', deuda:'5400', ventasBase:'43500', margenFcf:'27.2', crec15:'25', crec610:'15', tasaK:'15', multiplo:'30', fclBase:'13022', g:'2.5' });
+  c.scn.bear = { crec15:'12', margenFcf:'22', multiplo:'20' };
+  c.scn.base = { crec15:'', margenFcf:'', multiplo:'' };
+  c.scn.bull = { crec15:'30', margenFcf:'30', multiplo:'35' };
+  Object.assign(c.moat, { marca:3, red:2, switching:5, escala:4, regulacion:3, tecnologia:5 });
+  c.decision = 'Esperar'; c.conviccion = 7;
+  c.riesgos = 'Restricciones de exportación a China: si se amplían, cae un porcentaje relevante de ventas de sistemas y ASML no tiene forma de compensarlo en el corto plazo.\nCiclo de capex de foundries: si TSMC recorta inversión, los pedidos se posponen y el revenue de sistemas cae fuerte aunque el negocio no se deteriore.\nConcentración: tres clientes deciden el año.';
+  c.catal = 'Adopción de High-NA EUV a volumen.\nRecuperación del ciclo de memoria.\nCrecimiento de la base instalada, que hace el ingreso menos cíclico.';
+  c.invalida = 'Que el margen de servicio deje de crecer con la base instalada.\nQue aparezca una vía tecnológica que evite la litografía avanzada.\nQue los clientes logren posponer compras sin perder competitividad.';
+  c.tesis = 'Compro el único cuello de botella de una industria que el mundo necesita expandir. La ventaja no es una patente sino tres décadas de cadena de suministro que nadie puede comprimir. Lo que el mercado discute mal es la ciclicidad: trata cada bache de pedidos como deterioro estructural cuando es timing de capex de tres clientes. Lo que yo puedo estar subestimando es el riesgo político, que no es analizable con estados financieros. A este precio la calidad está reconocida; espero un ciclo flojo para pagar menos por lo mismo.';
+  save(); renderAll(); toast('Ejemplo cargado');
+};
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+function renderMetricas(){
+  if(!co()) return;
+  renderCtx(); renderKPIs(); renderValInputs(); renderScns();
+  renderValuation(); renderMoat(); renderDecision(); renderExport();
+}
+function renderAll(){
+  renderRail();
+  if(!co()) return;
+  renderFicha(); renderSrcs(); renderSteps(); renderCtx();
+  if(!$('#tab-metricas').classList.contains('hidden')) renderMetricas();
+}
+
+/* tema */
+$('#themeBtn').onclick = () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : cur === 'light' ? '' : 'dark';
+  if(next) document.documentElement.setAttribute('data-theme', next);
+  else document.documentElement.removeAttribute('data-theme');
+  try{ localStorage.setItem('tesis.theme', next); }catch(e){}
+  setTimeout(drawRadar, 30);
+};
+try{ const t = localStorage.getItem('tesis.theme'); if(t) document.documentElement.setAttribute('data-theme', t); }catch(e){}
+
+/* arranque */
+load();
+if(!DB.cos.length){ const c = blank(); DB.cos.push(c); DB.sel = c.id; }
+if(!DB.sel || !co()) DB.sel = DB.cos[0].id;
+renderAll();
+detectAPI();
+</script>
+</body>
+</html>

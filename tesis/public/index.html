@@ -3,1261 +3,1413 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tesis — mesa de trabajo del inversor</title>
+<title>Tesis — mesa del inversor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* =========================================================
+   TOKENS — naranja/amarillo en claro y oscuro
+   ========================================================= */
 :root{
-  --bg:#FAFAFC; --panel:#FFFFFF; --panel-2:#F4F4F9;
-  --ink:#17171F; --ink-2:#5D5D72; --ink-3:#8C8CA3;
-  --line:#E7E7F0; --line-2:#D6D6E4;
-  --peri:#B9C2FF; --mint:#A8E8CE; --apricot:#FFCBA6; --lilac:#E0C4FF; --sky:#AEDDF2;
-  --peri-soft:#EEF0FF; --mint-soft:#E8FAF2; --apricot-soft:#FFF1E7; --lilac-soft:#F6EDFF; --sky-soft:#EBF7FD;
-  --accent:#4B3BD6; --accent-soft:#EDEBFF; --on-accent:#FFFFFF;
-  --good:#1F8F62; --warn:#B5761F; --bad:#C9463F;
-  --r:16px; --r-s:10px;
-  --shadow:0 1px 2px rgba(23,23,31,.04), 0 8px 24px -12px rgba(75,59,214,.12);
+  --bg:#fefefe; --panel:#ffffff; --panel-2:#f7f5f2;
+  --ink:#1a1a1a; --ink-2:#555; --ink-3:#999;
+  --line:#e8e4dc; --line-2:#d4cfc5;
+  --acc:#F97316;   /* naranja principal */
+  --acc2:#FBBF24;  /* amarillo */
+  --acc3:#FED7AA;  /* naranja suave */
+  --acc-soft:#FFF7ED;
+  --on-acc:#fff;
+  --good:#16a34a; --warn:#d97706; --bad:#dc2626;
+  --good-soft:#f0fdf4; --warn-soft:#fffbeb; --bad-soft:#fef2f2;
+  --r:14px; --r-s:9px;
+  --shadow:0 1px 3px rgba(0,0,0,.06), 0 6px 20px -8px rgba(249,115,22,.15);
 }
-@media (prefers-color-scheme: dark){
-:root:not([data-theme="light"]){
-  --bg:#121220; --panel:#1A1A2B; --panel-2:#202034;
-  --ink:#EDEDF5; --ink-2:#A9A9C0; --ink-3:#7B7B95;
-  --line:#2A2A42; --line-2:#353552;
-  --peri-soft:#1E1F3B; --mint-soft:#132E27; --apricot-soft:#33241A; --lilac-soft:#251B38; --sky-soft:#12262F;
-  --accent:#A99BFF; --accent-soft:#25234A; --on-accent:#16162A;
-  --good:#5CD6A0; --warn:#E0A94F; --bad:#F0776F;
-  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
-}}
-:root[data-theme="dark"]{
-  --bg:#121220; --panel:#1A1A2B; --panel-2:#202034;
-  --ink:#EDEDF5; --ink-2:#A9A9C0; --ink-3:#7B7B95;
-  --line:#2A2A42; --line-2:#353552;
-  --peri-soft:#1E1F3B; --mint-soft:#132E27; --apricot-soft:#33241A; --lilac-soft:#251B38; --sky-soft:#12262F;
-  --accent:#A99BFF; --accent-soft:#25234A; --on-accent:#16162A;
-  --good:#5CD6A0; --warn:#E0A94F; --bad:#F0776F;
-  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+[data-theme="dark"]{
+  --bg:#202020; --panel:#2a2a2a; --panel-2:#333;
+  --ink:#f0ede8; --ink-2:#aaa; --ink-3:#666;
+  --line:#3a3a3a; --line-2:#444;
+  --acc:#FB923C; --acc2:#FCD34D; --acc3:#7C2D12;
+  --acc-soft:#431407;
+  --on-acc:#1a0a00;
+  --good:#4ade80; --warn:#fbbf24; --bad:#f87171;
+  --good-soft:#052e16; --warn-soft:#1c1400; --bad-soft:#1c0606;
+  --shadow:0 1px 3px rgba(0,0,0,.4), 0 6px 20px -8px rgba(251,146,60,.1);
 }
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%; overflow:hidden}
 body{
   background:var(--bg); color:var(--ink);
-  font-family:"Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  font-family:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased;
 }
-.num{font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric:tabular-nums;}
-button,input,select,textarea{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px}
-@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit; color:inherit; background:none}
+:focus-visible{outline:2px solid var(--acc); outline-offset:2px; border-radius:5px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-/* ---------- shell ---------- */
-.app{display:grid; grid-template-columns:236px 1fr; min-height:100vh}
+/* ---- layout ---- */
+.shell{display:grid; grid-template-columns:220px 1fr; height:100vh; overflow:hidden}
+
+/* ---- rail ---- */
 .rail{
   border-right:1px solid var(--line); background:var(--panel);
-  padding:20px 14px; display:flex; flex-direction:column; gap:18px; position:sticky; top:0; height:100vh; overflow-y:auto;
+  display:flex; flex-direction:column; overflow:hidden; position:relative;
 }
-.brand{display:flex; align-items:center; gap:9px; padding:0 6px}
-.brand .mark{width:26px;height:26px;border-radius:8px;
-  background:conic-gradient(from 210deg, var(--peri), var(--mint), var(--apricot), var(--lilac), var(--peri));
-  box-shadow:inset 0 0 0 3px var(--panel);}
-.brand h1{font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.02em}
-.brand span{font-size:11.5px;color:var(--ink-3);display:block;line-height:1.2;margin-top:-2px}
-.rail-label{font-size:11.5px;color:var(--ink-3);padding:0 6px;letter-spacing:.01em}
-.colist{display:flex;flex-direction:column;gap:4px}
+.rail-head{
+  padding:14px 12px 10px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:8px; flex:none;
+}
+.logo-mark{
+  width:28px; height:28px; border-radius:8px; flex:none;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  display:grid; place-items:center;
+}
+.logo-mark svg{width:14px; height:14px}
+.logo-text{font-size:15px; font-weight:600; letter-spacing:-.02em}
+.logo-sub{font-size:10.5px; color:var(--ink-3); margin-top:-1px}
+.rail-scroll{flex:1; overflow-y:auto; overflow-x:hidden; padding:8px 8px 4px}
+.colist{display:flex; flex-direction:column; gap:2px; user-select:none}
 .co{
-  display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:var(--r-s);
-  cursor:pointer;border:1px solid transparent;background:transparent;text-align:left;width:100%;
+  display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:var(--r-s);
+  cursor:pointer; border:1px solid transparent; text-align:left; width:100%;
+  transition:background .1s; position:relative;
 }
 .co:hover{background:var(--panel-2)}
-.co[aria-current="true"]{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 22%, transparent)}
-.co .tk{font-weight:600;font-size:13.5px;letter-spacing:-.01em}
-.co .nm{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.co .dot{width:7px;height:7px;border-radius:50%;flex:none;background:var(--line-2)}
-.co .meta{min-width:0;flex:1}
+.co[aria-current="true"]{background:var(--acc-soft); border-color:color-mix(in srgb,var(--acc) 30%,transparent)}
+.co.drag-over{border-color:var(--acc); background:var(--acc-soft)}
+.co[draggable="true"]{cursor:grab}
+.co[draggable="true"]:active{cursor:grabbing}
+.co-drag{width:12px; height:12px; color:var(--ink-3); flex:none; opacity:.5}
+.co-dot{width:7px; height:7px; border-radius:50%; flex:none}
+.co-meta{min-width:0; flex:1}
+.co-tk{font-weight:600; font-size:13px; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.co-nm{font-size:11px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.rail-add{margin:6px 8px; width:calc(100% - 16px)}
+.rail-foot{border-top:1px solid var(--line); padding:10px 12px; flex:none; display:flex; align-items:center; gap:8px}
+.api-dot{width:7px; height:7px; border-radius:50%; background:var(--warn); flex:none}
+.api-dot.on{background:var(--good)}
+.api-lbl{font-size:11px; color:var(--ink-3); flex:1}
+.theme-btn{border:1px solid var(--line); border-radius:6px; padding:3px 7px; font-size:11px; cursor:pointer; color:var(--ink-2)}
+.theme-btn:hover{background:var(--panel-2)}
+
+/* ---- main ---- */
+.main{display:flex; flex-direction:column; overflow:hidden; min-width:0}
+.topbar{
+  border-bottom:1px solid var(--line); padding:10px 20px;
+  display:flex; align-items:center; gap:10px; flex:none;
+  background:var(--panel);
+}
+.tabs{display:flex; gap:2px; background:var(--panel-2); padding:3px; border-radius:10px}
+.tab{
+  border:0; background:transparent; padding:5px 14px; border-radius:7px; cursor:pointer;
+  font-size:13px; font-weight:500; color:var(--ink-2); transition:background .1s
+}
+.tab[aria-selected="true"]{background:var(--panel); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.topbar-grow{flex:1}
+.ctx-label{font-size:12px; color:var(--ink-3)}
+.scroll-area{flex:1; overflow-y:auto; overflow-x:hidden}
+.wrap{padding:20px 22px 60px; max-width:1100px; width:100%; margin:0 auto}
+.hidden{display:none!important}
+.empty-state{text-align:center; padding:80px 20px; color:var(--ink-3)}
+.empty-state h2{color:var(--ink); font-size:19px; font-weight:600; margin-bottom:6px}
+
+/* ---- btns ---- */
 .btn{
   border:1px solid var(--line-2); background:var(--panel); border-radius:var(--r-s);
-  padding:8px 12px; cursor:pointer; font-size:13.5px; font-weight:500; transition:background .12s, border-color .12s;
+  padding:7px 12px; cursor:pointer; font-size:13px; font-weight:500;
+  transition:background .1s; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
 }
 .btn:hover{background:var(--panel-2)}
-.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
-.btn.primary:hover{filter:brightness(1.07)}
-.btn.primary[disabled]{opacity:.45;cursor:not-allowed;filter:none}
-.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.btn.pri{background:var(--acc); border-color:var(--acc); color:var(--on-acc)}
+.btn.pri:hover{filter:brightness(1.07)}
+.btn.pri:disabled{opacity:.45; cursor:not-allowed; filter:none}
+.btn.ghost{border-color:transparent; background:transparent; color:var(--ink-2)}
 .btn.ghost:hover{background:var(--panel-2)}
-.btn.sm{padding:5px 9px;font-size:12.5px;border-radius:8px}
-.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
-.status{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-3);padding:0 6px}
-.status i{width:6px;height:6px;border-radius:50%;background:var(--warn);flex:none}
-.status.on i{background:var(--good)}
+.btn.sm{padding:4px 9px; font-size:12px; border-radius:7px}
+.btn.icon{padding:6px 8px; border-radius:8px}
+.btn.warn-btn{background:var(--warn-soft); border-color:var(--warn); color:var(--warn)}
+.row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
 
-/* ---------- main ---------- */
-.main{min-width:0;display:flex;flex-direction:column}
-.topbar{
-  position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%, transparent);
-  backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
-  padding:12px 28px; display:flex;align-items:center;gap:16px;flex-wrap:wrap;
-}
-.tabs{display:flex;gap:3px;background:var(--panel-2);padding:3px;border-radius:11px}
-.tab{border:0;background:transparent;padding:6px 15px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--ink-2)}
-.tab[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(23,23,31,.06)}
-.topbar .grow{flex:1}
-.wrap{padding:26px 28px 80px;max-width:1180px;width:100%;margin:0 auto}
-.hidden{display:none!important}
-
-/* ---------- hero capture ---------- */
-.desk{
-  border:1px solid var(--line); border-radius:22px; padding:26px; background:var(--panel);
-  background-image:
-    radial-gradient(680px 220px at 8% -10%, var(--peri-soft), transparent 65%),
-    radial-gradient(520px 200px at 92% 0%, var(--mint-soft), transparent 60%),
-    radial-gradient(420px 260px at 55% 120%, var(--lilac-soft), transparent 65%);
+/* ---- capture zone ---- */
+.hero-cap{
+  border:1px solid var(--line); border-radius:18px; padding:22px;
+  background:var(--panel);
+  background-image:radial-gradient(500px 160px at 0% -20%,color-mix(in srgb,var(--acc) 8%,transparent),transparent 60%),
+    radial-gradient(400px 180px at 100% 0%,color-mix(in srgb,var(--acc2) 10%,transparent),transparent 60%);
   box-shadow:var(--shadow);
 }
-.desk h2{margin:0 0 4px;font-size:26px;font-weight:600;letter-spacing:-.028em;line-height:1.15}
-.desk p.lede{margin:0 0 20px;color:var(--ink-2);font-size:14.5px;max-width:62ch}
-.drop{
-  border:1.5px dashed var(--line-2); border-radius:var(--r); padding:26px 20px; text-align:center;
-  background:color-mix(in srgb,var(--panel) 70%, transparent); cursor:pointer; transition:border-color .15s, background .15s;
+.hero-cap h2{font-size:22px; font-weight:600; letter-spacing:-.025em; margin-bottom:3px}
+.hero-cap .lede{font-size:13.5px; color:var(--ink-2); margin-bottom:16px; max-width:58ch}
+.drop-zone{
+  border:1.5px dashed var(--line-2); border-radius:var(--r); padding:22px 16px;
+  text-align:center; cursor:pointer; transition:border-color .15s,background .15s;
 }
-.drop:hover,.drop.over{border-color:var(--accent); background:var(--accent-soft)}
-.drop .big{font-weight:500;font-size:15px}
-.drop .small{font-size:12.5px;color:var(--ink-3);margin-top:3px}
-.cap-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}
+.drop-zone:hover,.drop-zone.over{border-color:var(--acc); background:var(--acc-soft)}
+.drop-zone .big{font-weight:500; font-size:14px}
+.drop-zone .sm-hint{font-size:12px; color:var(--ink-3); margin-top:3px}
+.inp-row{display:grid; grid-template-columns:1fr auto; gap:7px; margin-top:10px}
 .field{
-  width:100%;border:1px solid var(--line-2);background:var(--panel);border-radius:var(--r-s);
-  padding:9px 11px;font-size:14px;
+  width:100%; border:1px solid var(--line-2); background:var(--panel);
+  border-radius:var(--r-s); padding:8px 10px; font-size:13.5px; transition:border-color .1s;
 }
-textarea.field{resize:vertical;min-height:96px;line-height:1.5}
+.field:focus{border-color:var(--acc); outline:none}
+textarea.field{resize:vertical; min-height:88px; line-height:1.5}
+.srcs{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px}
+.src-chip{
+  display:inline-flex; align-items:center; gap:6px; padding:5px 8px 5px 7px;
+  border-radius:8px; border:1px solid var(--line); background:var(--panel); font-size:12px;
+}
+.src-ck{width:14px; height:14px; border-radius:50%; background:var(--good); display:grid; place-items:center; flex:none}
+.src-ck svg{width:8px; height:8px}
+.src-type{font-size:10px; color:var(--ink-3); background:var(--panel-2); padding:1px 4px; border-radius:4px}
+.src-x{border:0; background:transparent; color:var(--ink-3); cursor:pointer; font-size:13px; padding:0 1px}
+.src-x:hover{color:var(--bad)}
 
-/* ---------- sources ---------- */
-.srcs{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
-.src{
-  display:inline-flex;align-items:center;gap:7px;padding:6px 9px 6px 8px;border-radius:9px;
-  border:1px solid var(--line);background:var(--panel);font-size:12.5px;max-width:100%;
-}
-.src .ck{width:15px;height:15px;border-radius:50%;background:var(--mint);display:grid;place-items:center;flex:none}
-.src .ck svg{width:9px;height:9px}
-.src .tag{font-size:10.5px;color:var(--ink-3);background:var(--panel-2);padding:1px 5px;border-radius:5px}
-.src b{font-weight:500;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.src .x{border:0;background:transparent;color:var(--ink-3);cursor:pointer;padding:0 1px;font-size:14px;line-height:1}
-.src .x:hover{color:var(--bad)}
+/* ---- ficha ---- */
+.block{margin-top:22px}
+.block-title{font-size:14px; font-weight:600; letter-spacing:-.015em; margin-bottom:2px}
+.block-sub{font-size:12px; color:var(--ink-3); margin-bottom:11px}
+.card{border:1px solid var(--line); background:var(--panel); border-radius:var(--r); padding:15px}
+.g2{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
+.g3{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.g4{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+.g6{display:grid; grid-template-columns:repeat(6,1fr); gap:10px}
+.lab{display:block; font-size:11px; color:var(--ink-3); margin-bottom:3px}
 
-/* ---------- ficha ---------- */
-.grid{display:grid;gap:12px}
-.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
-.g4{grid-template-columns:repeat(4,1fr)} .g6{grid-template-columns:repeat(6,1fr)}
-label.lab{display:block;font-size:11.5px;color:var(--ink-3);margin-bottom:4px}
-section.block{margin-top:24px}
-section.block > h3{
-  font-size:15px;font-weight:600;margin:0 0 3px;letter-spacing:-.015em;display:flex;align-items:center;gap:9px;
+/* ---- steps ---- */
+.steps{display:flex; flex-direction:column; gap:9px}
+.step{border:1px solid var(--line); border-radius:var(--r); background:var(--panel); overflow:hidden}
+.step summary{
+  list-style:none; cursor:pointer; padding:12px 14px;
+  display:flex; align-items:center; gap:10px;
 }
-section.block > p.sub{margin:0 0 13px;color:var(--ink-3);font-size:12.5px}
-.card{border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:16px}
+.step summary::-webkit-details-marker{display:none}
+.step-idx{
+  width:22px; height:22px; border-radius:7px; display:grid; place-items:center; flex:none;
+  font-size:11.5px; font-weight:600;
+  background:var(--acc-soft); color:var(--acc);
+}
+.step:nth-of-type(2) .step-idx{background:var(--warn-soft);color:var(--warn)}
+.step:nth-of-type(3) .step-idx{background:var(--good-soft);color:var(--good)}
+.step-ttl{font-weight:500; font-size:13.5px; flex:1}
+.step-ttl em{display:block; font-style:normal; font-size:11.5px; color:var(--ink-3); font-weight:400}
+.step-st{font-size:11px; color:var(--ink-3)}
+.step-chev{transition:transform .15s; color:var(--ink-3)}
+details[open] .step-chev{transform:rotate(90deg)}
+.step-body{padding:0 14px 14px}
+.step-ta{
+  width:100%; min-height:200px; border:1px solid var(--line); border-radius:var(--r-s);
+  padding:11px; background:var(--panel-2); font-size:13px; line-height:1.65;
+  white-space:pre-wrap; resize:vertical; font-family:inherit;
+}
+.pulse-anim{animation:pulse 1.3s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
-/* ---------- steps ---------- */
-.steps{display:flex;flex-direction:column;gap:10px}
-.step{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);overflow:hidden}
-.step > summary{
-  list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:12px;
-}
-.step > summary::-webkit-details-marker{display:none}
-.step .idx{
-  width:24px;height:24px;border-radius:8px;display:grid;place-items:center;flex:none;
-  font-size:12px;font-weight:600;background:var(--peri-soft);color:var(--accent);
-}
-.step:nth-of-type(2) .idx{background:var(--mint-soft);color:var(--good)}
-.step:nth-of-type(3) .idx{background:var(--apricot-soft);color:var(--warn)}
-.step .ttl{font-weight:500;font-size:14.5px;flex:1;min-width:0}
-.step .ttl em{display:block;font-style:normal;font-size:12px;color:var(--ink-3);font-weight:400}
-.step .st{font-size:11.5px;color:var(--ink-3)}
-.step .body{padding:0 16px 16px}
-.step .body textarea{
-  width:100%;min-height:220px;border:1px solid var(--line);border-radius:var(--r-s);
-  padding:12px;background:var(--panel-2);font-size:13.5px;line-height:1.62;white-space:pre-wrap;resize:vertical;
-  font-family:inherit;
-}
-.chev{transition:transform .18s;color:var(--ink-3)}
-.step[open] .chev{transform:rotate(90deg)}
-.pulse{animation:pulse 1.4s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
-.reveal{animation:rise .4s cubic-bezier(.2,.7,.3,1) both}
-@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* ---- kpis ---- */
+.kpi-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:9px}
 
-/* ---------- KPI ---------- */
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.kpi{border:1px solid var(--line);border-radius:14px;padding:12px 13px;background:var(--panel);position:relative}
-.kpi .k{font-size:11.5px;color:var(--ink-3);display:block;margin-bottom:2px}
-.kpi .v{font-size:21px;font-weight:500;letter-spacing:-.02em;display:flex;align-items:baseline;gap:4px}
-.kpi input{
-  border:0;background:transparent;width:100%;font-size:21px;font-weight:500;letter-spacing:-.02em;
-  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;padding:0;
+/* drag-and-drop tablero */
+.metric-pool{display:flex; flex-wrap:wrap; gap:6px; padding:10px; background:var(--panel-2); border-radius:var(--r); min-height:46px; border:1.5px dashed var(--line-2)}
+.metric-pool.drag-over{border-color:var(--acc); background:var(--acc-soft)}
+.metric-tag{
+  display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:7px;
+  border:1px solid var(--line); background:var(--panel); font-size:12px; cursor:grab;
+  user-select:none; font-weight:500;
 }
-.kpi input:focus{outline:none;border-bottom:1.5px solid var(--accent)}
-.kpi .u{font-size:12px;color:var(--ink-3);font-family:inherit}
-.kpi.tint-a{background:var(--peri-soft)} .kpi.tint-b{background:var(--mint-soft)}
-.kpi.tint-c{background:var(--apricot-soft)} .kpi.tint-d{background:var(--lilac-soft)}
-.kpi .hint{font-size:11px;color:var(--ink-3);margin-top:3px;min-height:1em}
+.metric-tag:active{cursor:grabbing; opacity:.7}
+.metric-tag .tag-x{border:0; background:transparent; color:var(--ink-3); cursor:pointer; font-size:12px; padding:0}
+.metric-tag .tag-x:hover{color:var(--bad)}
+.kpi-card{
+  border:1px solid var(--line); border-radius:12px; padding:11px 12px;
+  background:var(--panel); position:relative; cursor:grab;
+}
+.kpi-card:active{cursor:grabbing; opacity:.8}
+.kpi-card.drag-over{border-color:var(--acc)}
+.kpi-card.tint-a{background:color-mix(in srgb,var(--acc) 6%,var(--panel))}
+.kpi-card.tint-b{background:color-mix(in srgb,var(--acc2) 8%,var(--panel))}
+.kpi-card.tint-c{background:color-mix(in srgb,var(--good) 6%,var(--panel))}
+.kpi-k{font-size:11px; color:var(--ink-3); display:block; margin-bottom:2px}
+.kpi-v{font-size:20px; font-weight:500; letter-spacing:-.02em; display:flex; align-items:baseline; gap:3px}
+.kpi-input{
+  border:0; background:transparent; width:100%; font-size:20px; font-weight:500;
+  letter-spacing:-.02em; font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; padding:0;
+}
+.kpi-input:focus{outline:none; border-bottom:1.5px solid var(--acc)}
+.kpi-u{font-size:11.5px; color:var(--ink-3); font-family:inherit}
+.kpi-hint{font-size:10.5px; color:var(--ink-3); margin-top:2px; min-height:1em}
 
-/* ---------- gauge (signature) ---------- */
-.gauge{padding:20px 18px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
-.gauge .bar{
-  height:44px;border-radius:12px;position:relative;margin:30px 0 8px;
-  background:linear-gradient(90deg, var(--apricot) 0%, var(--apricot) 22%, var(--sky) 45%, var(--mint) 78%, var(--mint) 100%);
-  opacity:.85;
-}
-.gauge .mark{position:absolute;top:-26px;bottom:-6px;width:2px;background:var(--ink);border-radius:2px}
-.gauge .mark span{
-  position:absolute;top:-4px;left:50%;transform:translate(-50%,-100%);white-space:nowrap;
-  font-size:11.5px;background:var(--ink);color:var(--bg);padding:2px 7px;border-radius:6px;font-weight:500;
-}
-.gauge .tick{position:absolute;top:0;bottom:0;width:1px;background:color-mix(in srgb,var(--ink) 25%, transparent)}
-.gauge .tick b{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);font-size:11px;font-weight:500;color:var(--ink-2);white-space:nowrap}
-.gauge .legend{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-3);margin-top:26px}
-.mos{display:flex;align-items:baseline;gap:10px;margin-top:14px;flex-wrap:wrap}
-.mos .big{font-size:32px;font-weight:600;letter-spacing:-.03em}
-.mos .lbl{font-size:12.5px;color:var(--ink-2)}
+/* ---- valoración ---- */
+.gauge-wrap{padding:18px; border:1px solid var(--line); border-radius:var(--r); background:var(--panel)}
+.gauge-bar{height:40px; border-radius:10px; position:relative; margin:26px 0 6px;
+  background:linear-gradient(90deg,var(--bad-soft) 0%,var(--warn-soft) 45%,var(--good-soft) 100%)}
+.gauge-mark{position:absolute; top:-22px; bottom:-4px; width:2px; background:var(--ink); border-radius:2px}
+.gauge-mark span{position:absolute; top:-3px; left:50%; transform:translate(-50%,-100%); white-space:nowrap;
+  font-size:11px; background:var(--ink); color:var(--bg); padding:2px 6px; border-radius:5px; font-weight:500}
+.gauge-tick{position:absolute; top:0; bottom:0; width:1px; background:color-mix(in srgb,var(--ink) 20%,transparent)}
+.gauge-tick b{position:absolute; top:calc(100% + 5px); left:50%; transform:translateX(-50%); font-size:10.5px; font-weight:500; color:var(--ink-2); white-space:nowrap}
+.gauge-legend{display:flex; justify-content:space-between; font-size:11px; color:var(--ink-3); margin-top:22px}
+.mos-row{display:flex; align-items:baseline; gap:8px; margin-top:12px; flex-wrap:wrap}
+.mos-big{font-size:30px; font-weight:600; letter-spacing:-.03em}
 .pos{color:var(--good)} .neg{color:var(--bad)}
 
-/* ---------- table ---------- */
-table.t{width:100%;border-collapse:collapse;font-size:13px}
-table.t th,table.t td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--line)}
-table.t th:first-child,table.t td:first-child{text-align:left;color:var(--ink-2)}
-table.t thead th{font-weight:500;font-size:11.5px;color:var(--ink-3);border-bottom:1px solid var(--line-2)}
-table.t tbody tr:last-child td{border-bottom:0}
-table.t td.v{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
-.scroll{overflow-x:auto}
+/* ---- escenarios ---- */
+.scn-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.scn{border:1px solid var(--line); border-radius:var(--r); padding:13px}
+.scn.bear{border-color:color-mix(in srgb,var(--bad) 30%,transparent); background:var(--bad-soft)}
+.scn.base{border-color:color-mix(in srgb,var(--acc2) 30%,transparent); background:var(--warn-soft)}
+.scn.bull{border-color:color-mix(in srgb,var(--good) 30%,transparent); background:var(--good-soft)}
+.scn h4{font-size:13px; font-weight:600; margin-bottom:2px}
+.scn .scn-r{font-size:24px; font-weight:600; letter-spacing:-.025em; margin:5px 0 2px}
 
-/* ---------- misc ---------- */
-.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:99px;font-size:12.5px;font-weight:500;border:1px solid transparent}
-.pill.buy{background:var(--mint-soft);color:var(--good);border-color:color-mix(in srgb,var(--good) 25%,transparent)}
-.pill.wait{background:var(--apricot-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 25%,transparent)}
-.pill.no{background:color-mix(in srgb,var(--bad) 10%,transparent);color:var(--bad);border-color:color-mix(in srgb,var(--bad) 25%,transparent)}
-.conv{display:flex;gap:3px;align-items:center}
-.conv i{width:9px;height:16px;border-radius:3px;background:var(--line-2);cursor:pointer}
-.conv i.on{background:var(--accent)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:12.5px;display:flex;gap:6px;align-items:center}
-.chip button{border:0;background:transparent;color:var(--ink-3);cursor:pointer;padding:0}
-.empty{text-align:center;padding:60px 20px;color:var(--ink-3)}
-.empty h2{color:var(--ink);font-weight:600;font-size:20px;letter-spacing:-.02em;margin:0 0 6px}
+/* ---- proyecciones ---- */
+.proj-card{border:1px solid color-mix(in srgb,var(--acc2) 40%,transparent); background:color-mix(in srgb,var(--acc2) 6%,var(--panel)); border-radius:var(--r); padding:14px}
+.proj-item{display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:1px solid var(--line)}
+.proj-item:last-child{border-bottom:0}
+.proj-dot{width:6px; height:6px; border-radius:50%; background:var(--acc); margin-top:5px; flex:none}
+.proj-text{font-size:13px; line-height:1.55; flex:1}
+.proj-src{font-size:10.5px; color:var(--ink-3); margin-top:2px}
+.proj-impact{font-size:11px; padding:1px 6px; border-radius:5px; font-weight:500; margin-top:2px; display:inline-block}
+.proj-impact.up{background:var(--good-soft); color:var(--good)}
+.proj-impact.down{background:var(--bad-soft); color:var(--bad)}
+.proj-impact.neut{background:var(--panel-2); color:var(--ink-3)}
+
+/* ---- tablero actualizar ---- */
+.update-bar{display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--acc-soft); border-radius:var(--r); border:1px solid color-mix(in srgb,var(--acc) 25%,transparent); margin-bottom:14px}
+.update-bar.refreshing{background:var(--warn-soft); border-color:var(--warn)}
+.upd-label{flex:1; font-size:12.5px; color:var(--ink-2)}
+.last-upd{font-size:11px; color:var(--ink-3)}
+
+/* ---- chart técnico ---- */
+.chart-controls{display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:12px}
+.period-btn{padding:3px 9px; border-radius:6px; border:1px solid var(--line); background:var(--panel); font-size:12px; cursor:pointer; color:var(--ink-2)}
+.period-btn.active{background:var(--acc); border-color:var(--acc); color:var(--on-acc)}
+.indic-btn{padding:3px 9px; border-radius:6px; border:1px solid var(--line); background:var(--panel); font-size:12px; cursor:pointer; color:var(--ink-2)}
+.indic-btn.active{border-color:var(--acc2); color:var(--acc); background:var(--acc-soft)}
+.chart-area{background:var(--panel-2); border-radius:var(--r); overflow:hidden; position:relative}
+
+/* ---- moat radar ---- */
+.split2{display:grid; grid-template-columns:1.2fr 1fr; gap:12px}
+
+/* ---- export ---- */
+table.t-export{width:100%; border-collapse:collapse; font-size:12.5px}
+table.t-export th,table.t-export td{padding:6px 8px; border-bottom:1px solid var(--line); text-align:left}
+table.t-export th{font-size:11px; color:var(--ink-3); font-weight:500; border-bottom:1px solid var(--line-2)}
+table.t-export td.v{text-align:right; font-family:'IBM Plex Mono',monospace}
+table.t-export tbody tr:last-child td{border-bottom:0}
+
+/* ---- misc ---- */
+.pill{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:500; border:1px solid transparent}
+.pill.buy{background:var(--good-soft);color:var(--good);border-color:color-mix(in srgb,var(--good) 25%,transparent)}
+.pill.wait{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 25%,transparent)}
+.pill.no{background:var(--bad-soft);color:var(--bad);border-color:color-mix(in srgb,var(--bad) 25%,transparent)}
+.conv-row{display:flex; gap:2px; align-items:center}
+.conv-pip{width:10px; height:18px; border-radius:3px; background:var(--line-2); cursor:pointer; transition:background .1s}
+.conv-pip.on{background:var(--acc)}
+.note{font-size:12px; color:var(--ink-3); line-height:1.5}
 .toast{
-  position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;
-  background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:11px;font-size:13.5px;z-index:99;
-  transition:opacity .2s, transform .2s;pointer-events:none;
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(16px); opacity:0;
+  background:var(--ink); color:var(--bg); padding:9px 16px; border-radius:10px; font-size:13px;
+  z-index:999; transition:opacity .18s,transform .18s; pointer-events:none;
 }
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.split{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
-.note{font-size:12px;color:var(--ink-3);line-height:1.5}
-.scn{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel)}
-.scn h4{margin:0 0 2px;font-size:13.5px;font-weight:600}
-.scn .r{font-size:26px;font-weight:600;letter-spacing:-.025em;margin:6px 0 2px}
-.scn.bear{background:var(--apricot-soft)} .scn.base{background:var(--sky-soft)} .scn.bull{background:var(--mint-soft)}
-.scn label.lab{color:var(--ink-2)}
-.scn .field{background:color-mix(in srgb,var(--panel) 60%,transparent);font-size:13px;padding:6px 8px}
-@media(max-width:1000px){
-  .app{grid-template-columns:1fr}
-  .rail{position:static;height:auto;flex-direction:row;align-items:center;overflow-x:auto;gap:12px;border-right:0;border-bottom:1px solid var(--line)}
-  .rail-label,.rail-foot .note{display:none}
-  .colist{flex-direction:row}.co{width:auto}
-  .rail-foot{margin-top:0;flex-direction:row}
-  .kpis{grid-template-columns:repeat(2,1fr)}
-  .g3,.g4,.g6,.split{grid-template-columns:1fr}
-  .g2{grid-template-columns:1fr}
-  .wrap{padding:18px 16px 60px}.topbar{padding:10px 16px}
-}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.divider{height:1px; background:var(--line); margin:18px 0}
+.scroll-tbl{overflow-x:auto}
 </style>
 </head>
 <body>
+<div class="shell">
 
-<div class="app">
-  <!-- ============ RAIL ============ -->
-  <aside class="rail">
-    <div class="brand">
-      <div class="mark"></div>
-      <div><h1>Tesis</h1><span>mesa del inversor</span></div>
+<!-- ============================================================ RAIL -->
+<aside class="rail">
+  <div class="rail-head">
+    <div class="logo-mark">
+      <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="white" stroke-width="1.8"/><path d="M4.5 7h5M7 4.5v5" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </div>
+    <div><div class="logo-text">Tesis</div><div class="logo-sub">mesa del inversor</div></div>
+  </div>
+
+  <div class="rail-scroll">
+    <div class="note" style="padding:6px 4px 6px; color:var(--ink-3)">Empresas</div>
+    <div class="colist" id="colist"></div>
+    <button class="btn sm ghost rail-add" id="newCo" style="margin-top:6px; width:100%">+ Nueva empresa</button>
+  </div>
+
+  <div class="rail-foot">
+    <div class="api-dot" id="apiDot"></div>
+    <span class="api-lbl" id="apiLbl">Modo local</span>
+    <button class="theme-btn" id="themeBtn">◐</button>
+  </div>
+</aside>
+
+<!-- ============================================================ MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-tab="carga">Carga</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="metricas">Métricas</button>
+    </div>
+    <div class="topbar-grow"></div>
+    <span class="ctx-label" id="ctxLabel"></span>
+    <button class="btn sm" id="copyBtn">Copiar tabla</button>
+    <button class="btn sm" id="csvBtn">CSV</button>
+  </div>
+
+  <div class="scroll-area">
+
+    <!-- ---- EMPTY ---- -->
+    <div id="noCo" class="empty-state hidden">
+      <h2>Ninguna empresa todavía</h2>
+      <p style="margin-bottom:16px">Creá la primera para empezar.</p>
+      <button class="btn pri" onclick="document.getElementById('newCo').click()">Crear empresa</button>
     </div>
 
-    <div>
-      <div class="rail-label" style="margin-bottom:7px">Empresas</div>
-      <div class="colist" id="colist"></div>
-      <button class="btn sm ghost" id="newCo" style="margin-top:8px;width:100%">+ Nueva empresa</button>
-    </div>
-
-    <div class="rail-foot">
-      <div class="status" id="apiStatus"><i></i><span>Modo local</span></div>
-      <button class="btn sm ghost" id="themeBtn">Cambiar tema</button>
-      <p class="note" style="padding:0 6px">Todo se guarda en este navegador.</p>
-    </div>
-  </aside>
-
-  <!-- ============ MAIN ============ -->
-  <main class="main">
-    <div class="topbar">
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" aria-selected="true" data-tab="carga">Carga</button>
-        <button class="tab" role="tab" aria-selected="false" data-tab="metricas">Métricas</button>
-      </div>
-      <div class="grow"></div>
-      <span class="note" id="ctxName"></span>
-      <button class="btn sm" id="copyBtn">Copiar tabla</button>
-      <button class="btn sm" id="csvBtn">Descargar CSV</button>
-    </div>
-
-    <div id="noCo" class="empty hidden">
-      <h2>Todavía no hay ninguna empresa</h2>
-      <p>Creá la primera para empezar a cargar información.</p>
-      <button class="btn primary" onclick="document.getElementById('newCo').click()">Crear empresa</button>
-    </div>
-
-    <!-- ---------- TAB CARGA ---------- -->
+    <!-- ======================================= TAB CARGA -->
     <div class="wrap" id="tab-carga">
 
-      <div class="desk">
-        <h2>Traé todo lo que sepas de la empresa.</h2>
-        <p class="lede">Reportes, transcripts, capturas de pantalla, notas sueltas, links. No hace falta que esté ordenado — el orden lo pone el análisis.</p>
+      <!-- captura -->
+      <div class="hero-cap">
+        <h2>Cargá todo lo que tenés de la empresa.</h2>
+        <p class="lede">PDFs, transcripts, notas, links. El orden lo pone el análisis.</p>
 
-        <div class="drop" id="drop" tabindex="0" role="button">
+        <div class="drop-zone" id="drop" tabindex="0" role="button">
           <div class="big">Soltá archivos acá o hacé clic para elegirlos</div>
-          <div class="small">PDF, TXT, MD, CSV, JSON · también podés pegar texto abajo</div>
+          <div class="sm-hint">PDF, TXT, MD, CSV, JSON</div>
           <input type="file" id="fileInput" multiple class="hidden" accept=".pdf,.txt,.md,.csv,.json,.tsv">
         </div>
 
-        <div class="cap-row">
-          <input class="field" id="urlInput" placeholder="https://… informe, nota, presentación">
+        <div class="inp-row" style="margin-top:10px">
+          <input class="field" id="urlInput" placeholder="https://… informe, nota, 10-K…">
           <button class="btn" id="addUrl">Agregar link</button>
         </div>
-
         <div style="margin-top:8px">
-          <textarea class="field" id="textInput" placeholder="Pegá acá el transcript de la earnings call, tus notas, un extracto del 10-K…"></textarea>
-          <div style="display:flex;gap:8px;margin-top:8px">
+          <textarea class="field" id="textInput" placeholder="Pegá acá el transcript, tus notas, un extracto…"></textarea>
+          <div class="row" style="margin-top:6px">
             <button class="btn" id="addText">Agregar texto</button>
-            <span class="note" id="charCount" style="align-self:center"></span>
+            <span class="note" id="charCount"></span>
           </div>
         </div>
-
         <div class="srcs" id="srcs"></div>
       </div>
 
       <!-- ficha -->
-      <section class="block">
-        <h3>Ficha del activo</h3>
-        <p class="sub">Lo mínimo para que el análisis sepa de qué estamos hablando.</p>
-        <div class="card grid g4" id="ficha"></div>
-      </section>
+      <div class="block">
+        <div class="block-title">Ficha del activo</div>
+        <div class="block-sub">Completala vos o usá el botón "Autocompletar" luego de cargar fuentes.</div>
+        <div class="card g4" id="fichaGrid" style="gap:10px; display:grid; grid-template-columns:repeat(4,1fr)"></div>
+      </div>
 
       <!-- análisis -->
-      <section class="block">
-        <h3>Recorrido del análisis</h3>
-        <p class="sub">Tres pasos del Blueprint. Podés generarlos con el modelo o escribirlos vos: el texto es editable.</p>
-
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-          <button class="btn primary" id="runAll">Analizar las fuentes</button>
-          <button class="btn" id="extractBtn">Extraer métricas al tablero</button>
-          <button class="btn ghost" id="demoBtn">Cargar ejemplo (ASML)</button>
+      <div class="block">
+        <div class="block-title">Recorrido del análisis</div>
+        <div class="block-sub">Tres pasos del Blueprint. El texto es editable aunque uses el modelo.</div>
+        <div class="row" style="margin-bottom:10px">
+          <button class="btn pri" id="runAll">Analizar fuentes</button>
+          <button class="btn" id="autoFichaBtn">Autocompletar ficha</button>
+          <button class="btn" id="extractBtn">→ Extraer al tablero</button>
+          <button class="btn ghost sm" id="demoBtn">Ejemplo ASML</button>
         </div>
-
         <div class="steps" id="steps"></div>
-      </section>
+      </div>
     </div>
 
-    <!-- ---------- TAB MÉTRICAS ---------- -->
+    <!-- ======================================= TAB MÉTRICAS -->
     <div class="wrap hidden" id="tab-metricas">
 
-      <!-- cabecera decisión -->
-      <div class="card" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
-        <div style="flex:1;min-width:200px">
-          <div class="note" id="mHead"></div>
-          <div style="font-size:23px;font-weight:600;letter-spacing:-.025em" id="mName">—</div>
+      <!-- update bar -->
+      <div class="update-bar" id="updateBar">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex:none"><path d="M14 8A6 6 0 1 1 8 2" stroke="var(--acc)" stroke-width="1.8" stroke-linecap="round"/><path d="M14 2v4h-4" stroke="var(--acc)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="upd-label">Precios y variables en tiempo real · <span id="lastUpdText">sin actualizar</span></span>
+        <span class="last-upd" id="livePrice">—</span>
+        <button class="btn sm warn-btn" id="updateBtn">Actualizar ahora</button>
+      </div>
+
+      <!-- cabecera -->
+      <div class="card row" style="gap:18px; flex-wrap:wrap; margin-bottom:0">
+        <div style="flex:1; min-width:180px">
+          <div class="note" id="mHead">—</div>
+          <div style="font-size:22px; font-weight:600; letter-spacing:-.025em" id="mName">—</div>
         </div>
         <div>
           <label class="lab">Decisión</label>
-          <select class="field" id="decision" style="width:150px">
+          <select class="field" id="decision" style="width:140px">
             <option>Comprar</option><option>Esperar</option><option>No invertir</option>
           </select>
         </div>
         <div>
-          <label class="lab">Convicción <span id="convN" class="num"></span>/10</label>
-          <div class="conv" id="conv"></div>
+          <label class="lab">Convicción <span id="convN"></span>/10</label>
+          <div class="conv-row" id="convRow"></div>
         </div>
         <div><span class="pill" id="decPill">—</span></div>
       </div>
 
-      <!-- KPIs -->
-      <section class="block">
-        <h3>Números del negocio</h3>
-        <p class="sub">Editá cualquier celda: el tablero recalcula solo.</p>
-        <div class="kpis" id="kpis"></div>
-      </section>
+      <!-- tablero drag-and-drop -->
+      <div class="block">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px">
+          <div class="block-title" style="margin:0">Tablero de métricas</div>
+          <span class="note">· arrastrá etiquetas para armar tu vista</span>
+        </div>
+        <div class="block-sub">Desde el banco de métricas disponibles abajo, arrastrá las que querés ver al tablero.</div>
+
+        <!-- banco -->
+        <div class="note" style="margin-bottom:5px">Banco de métricas disponibles</div>
+        <div class="metric-pool" id="metricPool"></div>
+        <div class="note" style="margin-top:8px; margin-bottom:12px">Tablero activo</div>
+        <div class="kpi-grid" id="kpiDashboard"></div>
+      </div>
 
       <!-- valoración -->
-      <section class="block">
-        <h3>Valoración</h3>
-        <p class="sub">Dos modelos: flujos descontados con múltiplo de salida a 10 años, y perpetuidad a 5 años.</p>
+      <div class="block">
+        <div class="block-title">Valoración</div>
+        <div class="block-sub">Flujos descontados a 10 años + valor terminal. Editá cualquier supuesto.</div>
 
-        <div class="split">
-          <div class="gauge" id="gauge">
-            <div style="display:flex;justify-content:space-between;align-items:baseline">
-              <div class="note">Precio hoy contra el rango de valor</div>
-              <div class="note num" id="gPrice"></div>
+        <div class="split2" style="margin-bottom:12px">
+          <div class="gauge-wrap" id="gaugeWrap">
+            <div class="row" style="justify-content:space-between">
+              <span class="note">Precio hoy vs rango de valor</span>
+              <span class="note mono" id="gPriceLabel"></span>
             </div>
-            <div class="bar" id="gbar">
-              <div class="tick" id="tBear"><b>bear</b></div>
-              <div class="tick" id="tBase"><b>base</b></div>
-              <div class="tick" id="tBull"><b>bull</b></div>
-              <div class="mark" id="gmark"><span>hoy</span></div>
+            <div class="gauge-bar" id="gbar">
+              <div class="gauge-tick" id="tBear"><b>bear</b></div>
+              <div class="gauge-tick" id="tBase"><b>base</b></div>
+              <div class="gauge-tick" id="tBull"><b>bull</b></div>
+              <div class="gauge-mark" id="gmark"><span>hoy</span></div>
             </div>
-            <div class="legend"><span>caro</span><span>razonable</span><span>barato</span></div>
-            <div class="mos">
-              <div class="big num" id="mosVal">—</div>
-              <div class="lbl">margen de seguridad sobre el escenario base</div>
+            <div class="gauge-legend"><span>caro</span><span>razonable</span><span>barato</span></div>
+            <div class="mos-row">
+              <div class="mos-big mono" id="mosVal">—</div>
+              <span class="note">margen de seguridad sobre el escenario base</span>
             </div>
-            <div class="note" id="mosNote" style="margin-top:6px"></div>
+            <div class="note" id="mosNote" style="margin-top:4px"></div>
           </div>
-
           <div class="card">
-            <label class="lab">Supuestos del modelo</label>
-            <div class="grid g2" id="valInputs"></div>
+            <label class="lab" style="margin-bottom:8px">Supuestos</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px" id="valInputs"></div>
           </div>
         </div>
 
-        <div class="grid g3" style="margin-top:14px" id="scns"></div>
+        <div class="scn-grid" id="scnsBox"></div>
 
-        <div class="card scroll" style="margin-top:14px">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
-            <strong style="font-size:13.5px;font-weight:600">Proyección del escenario base</strong>
-            <span class="note">ventas y flujo de caja libre, 10 años</span>
+        <div class="card scroll-tbl" style="margin-top:10px">
+          <div class="row" style="justify-content:space-between; margin-bottom:8px">
+            <strong style="font-size:13px">Proyección escenario base</strong>
+            <span class="note">ventas y FCF, 10 años</span>
           </div>
-          <table class="t" id="projTable"></table>
+          <table class="t-export" id="projTable"></table>
         </div>
-      </section>
+      </div>
 
-      <!-- calidad -->
-      <section class="block">
-        <h3>Calidad del negocio</h3>
-        <p class="sub">Cada barrera de 0 a 5. Lo que no se puede defender, no se puede sostener.</p>
-        <div class="split">
-          <div class="card" id="moatInputs"></div>
-          <div class="card" style="display:grid;place-items:center"><svg id="radar" viewBox="0 0 300 260" width="100%" style="max-width:330px"></svg></div>
+      <!-- proyecciones -->
+      <div class="block">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
+          <div class="block-title" style="margin:0">Proyecciones y catalizadores</div>
+          <button class="btn sm" id="refreshProj">↻ Buscar noticias</button>
         </div>
-      </section>
+        <div class="block-sub">Factores externos capturados del análisis y noticias recientes que impactan la tesis.</div>
+        <div class="proj-card" id="projCard">
+          <div class="note">Sin proyecciones cargadas. Generá el análisis o usá "Buscar noticias".</div>
+        </div>
+      </div>
+
+      <!-- calidad / moat -->
+      <div class="block">
+        <div class="block-title">Calidad del negocio</div>
+        <div class="block-sub">Cada barrera de 0 a 5.</div>
+        <div class="split2">
+          <div class="card" id="moatInputsBox"></div>
+          <div class="card" style="display:grid; place-items:center">
+            <svg id="radar" viewBox="0 0 280 250" width="100%" style="max-width:310px"></svg>
+          </div>
+        </div>
+      </div>
 
       <!-- riesgos -->
-      <section class="block">
-        <h3>Riesgos, catalizadores y qué mira la tesis</h3>
-        <p class="sub">Un riesgo sin mecanismo causal no es un riesgo, es una palabra.</p>
-        <div class="grid g3">
-          <div class="card"><label class="lab">Riesgos con mecanismo</label><textarea class="field" id="riesgos" style="min-height:130px"></textarea></div>
-          <div class="card"><label class="lab">Catalizadores</label><textarea class="field" id="catal" style="min-height:130px"></textarea></div>
-          <div class="card"><label class="lab">Qué invalidaría la tesis</label><textarea class="field" id="invalida" style="min-height:130px"></textarea></div>
+      <div class="block">
+        <div class="block-title">Riesgos, catalizadores e invalidadores</div>
+        <div class="block-sub">Un riesgo sin mecanismo causal no sirve.</div>
+        <div class="g3">
+          <div class="card"><label class="lab">Riesgos</label><textarea class="field" id="riesgos" style="min-height:120px"></textarea></div>
+          <div class="card"><label class="lab">Catalizadores</label><textarea class="field" id="catal" style="min-height:120px"></textarea></div>
+          <div class="card"><label class="lab">Qué invalida la tesis</label><textarea class="field" id="invalida" style="min-height:120px"></textarea></div>
         </div>
-      </section>
+      </div>
 
-      <section class="block">
-        <h3>Tesis en una página</h3>
-        <p class="sub">Qué compro, por qué, y qué ve mal el mercado.</p>
-        <div class="card"><textarea class="field" id="tesis" style="min-height:170px" placeholder="Escribilo como se lo explicarías a alguien que te va a discutir cada frase."></textarea></div>
-      </section>
+      <!-- tesis -->
+      <div class="block">
+        <div class="block-title">Tesis en una página</div>
+        <div class="card"><textarea class="field" id="tesis" style="min-height:150px" placeholder="Qué compro, por qué, qué ve mal el mercado, qué tendría que pasar para que esté equivocado."></textarea></div>
+      </div>
 
-      <section class="block">
-        <h3>Tabla para la planilla</h3>
-        <p class="sub">Copiá y pegá en Google Sheets: cae en columnas, sin formato raro.</p>
-        <div class="card scroll"><table class="t" id="exportTable"></table></div>
-      </section>
+      <!-- análisis técnico -->
+      <div class="block">
+        <div class="block-title">Análisis técnico</div>
+        <div class="block-sub">Velas diarias, medias móviles y volumen. Ticker del tablero o del campo de abajo.</div>
+        <div class="chart-controls">
+          <input class="field" id="chartTicker" style="width:110px" placeholder="Ticker…">
+          <button class="btn sm pri" id="loadChart">Cargar</button>
+          <div style="display:flex; gap:4px" id="periodBtns">
+            <button class="period-btn active" data-p="1mo">1M</button>
+            <button class="period-btn" data-p="3mo">3M</button>
+            <button class="period-btn" data-p="6mo">6M</button>
+            <button class="period-btn" data-p="1y">1A</button>
+            <button class="period-btn" data-p="5y">5A</button>
+          </div>
+          <div style="display:flex; gap:4px" id="indicBtns">
+            <button class="indic-btn active" data-i="sma20">SMA 20</button>
+            <button class="indic-btn active" data-i="sma50">SMA 50</button>
+            <button class="indic-btn" data-i="bb">Bollinger</button>
+            <button class="indic-btn" data-i="vol">Volumen</button>
+          </div>
+        </div>
+        <div class="chart-area" id="chartArea" style="height:380px">
+          <canvas id="chartCanvas" style="width:100%; height:100%"></canvas>
+        </div>
+        <div style="margin-top:8px" id="chartIndicArea" class="hidden">
+          <div class="chart-area" style="height:120px"><canvas id="volCanvas" style="width:100%;height:100%"></canvas></div>
+        </div>
+        <div class="note" style="margin-top:6px" id="chartNote">Ingresá un ticker y hacé clic en Cargar.</div>
+      </div>
+
+      <!-- tabla exportable -->
+      <div class="block">
+        <div class="block-title">Tabla para la planilla</div>
+        <div class="block-sub">Copiá y pegá directo en Google Sheets.</div>
+        <div class="card scroll-tbl"><table class="t-export" id="exportTable"></table></div>
+      </div>
     </div>
-  </main>
+  </div>
+</main>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-/* =====================================================================
-   Tesis — mesa de trabajo del inversor
-   Frontend único. Funciona en dos modos:
-   · API   → si responde /api/health, usa el backend (OpenAI server-side)
-   · Local → sin backend: se cargan fuentes, se escribe el análisis a mano
-             y todo el motor de valoración / tablero funciona igual.
-   ===================================================================== */
-
+/* ============================================================
+   TESIS v2 — mesa del inversor
+   ============================================================ */
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
-const uid = () => Math.random().toString(36).slice(2, 9);
-const clamp = (n,a,b) => Math.min(b, Math.max(a, n));
-const nz = v => (v===''||v===null||v===undefined||isNaN(+v)) ? 0 : +v;
+const uid = () => Math.random().toString(36).slice(2,9);
+const nz = v => (v===''||v==null||isNaN(+v)) ? 0 : +v;
+const clamp = (n,a,b) => Math.min(b,Math.max(a,n));
+const esc = s => String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
-/* ---------------- persistencia ---------------- */
-const KEY = 'tesis.v1';
-let DB = { cos: [], sel: null };
-function load(){ try{ const r = localStorage.getItem(KEY); if(r) DB = JSON.parse(r); }catch(e){} }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
-const co = () => DB.cos.find(c => c.id === DB.sel);
+/* ---- DB ---- */
+const KEY = 'tesis.v2';
+let DB = { cos:[], sel:null };
+function load(){ try{ const r=localStorage.getItem(KEY); if(r) DB=JSON.parse(r); }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){} }
+const co = () => DB.cos.find(c=>c.id===DB.sel);
 
 function blank(){
   return {
-    id: uid(),
-    ficha:{ nombre:'', ticker:'', mercado:'', industria:'', tipo:'Acción', horizonte:'Largo plazo' },
+    id:uid(),
+    ficha:{nombre:'',ticker:'',mercado:'',industria:'',tipo:'Acción',horizonte:'Largo plazo'},
     fuentes:[],
-    pasos:{ p1:'', p2:'', p3:'' },
-    kpi:{ ingresos:'', crecIngresos:'', mBruto:'', mOperativo:'', mNeto:'',
-          fcf:'', roic:'', roe:'', wacc:'', per:'', perHist:'', deudaNeta:'' },
-    val:{ precio:'', acciones:'', caja:'', deuda:'', ventasBase:'', margenFcf:'',
-          crec15:'', crec610:'', tasaK:'12', multiplo:'25', fclBase:'', g:'2.5' },
-    scn:{ bear:{crec15:'', margenFcf:'', multiplo:''},
-          base:{crec15:'', margenFcf:'', multiplo:''},
-          bull:{crec15:'', margenFcf:'', multiplo:''} },
-    moat:{ marca:0, red:0, switching:0, escala:0, regulacion:0, tecnologia:0 },
+    pasos:{p1:'',p2:'',p3:''},
+    kpi:{ingresos:'',crecIngresos:'',mBruto:'',mOperativo:'',mNeto:'',fcf:'',roic:'',roe:'',wacc:'',per:'',perHist:'',deudaNeta:''},
+    val:{precio:'',acciones:'',caja:'',deuda:'',ventasBase:'',margenFcf:'',crec15:'',crec610:'',tasaK:'12',multiplo:'25',fclBase:'',g:'2.5'},
+    scn:{bear:{crec15:'',margenFcf:'',multiplo:''},base:{crec15:'',margenFcf:'',multiplo:''},bull:{crec15:'',margenFcf:'',multiplo:''}},
+    moat:{marca:0,red:0,switching:0,escala:0,regulacion:0,tecnologia:0},
     decision:'Esperar', conviccion:5,
-    riesgos:'', catal:'', invalida:'', tesis:''
+    riesgos:'', catal:'', invalida:'', tesis:'',
+    proyecciones:[],
+    dashMetrics:['ingresos','crecIngresos','mBruto','mOperativo','fcf','roic','per'],
+    liveData:null
   };
 }
 
-/* ---------------- modo API ---------------- */
+/* ---- API detection ---- */
 let API = false;
 async function detectAPI(){
   try{
-    const r = await fetch('/api/health', { signal: AbortSignal.timeout(2500) });
-    if(r.ok){ API = true; $('#apiStatus').classList.add('on'); $('#apiStatus').querySelector('span').textContent = 'Modelo conectado'; }
-  }catch(e){ /* modo local */ }
+    const r = await fetch('/api/health',{signal:AbortSignal.timeout(2500)});
+    if(r.ok){ API=true; $('#apiDot').classList.add('on'); $('#apiLbl').textContent='Modelo conectado'; }
+  }catch(e){}
 }
 
-/* ---------------- toast ---------------- */
+/* ---- toast ---- */
 let tT;
-function toast(msg){
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(tT); tT = setTimeout(()=>t.classList.remove('show'), 2200);
-}
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'),2500); }
 
-/* =====================================================================
-   RAIL
-   ===================================================================== */
+/* ============================================================ RAIL ---- */
+let dragSrc = null;
+
 function renderRail(){
-  const list = $('#colist'); list.innerHTML = '';
-  DB.cos.forEach(c => {
-    const b = document.createElement('button');
-    b.className = 'co'; b.setAttribute('aria-current', c.id === DB.sel);
-    const color = c.decision === 'Comprar' ? 'var(--mint)' : c.decision === 'No invertir' ? 'var(--apricot)' : 'var(--sky)';
-    b.innerHTML = `<span class="dot" style="background:${color}"></span>
-      <span class="meta"><span class="tk">${esc(c.ficha.ticker || '—')}</span>
-      <span class="nm">${esc(c.ficha.nombre || 'sin nombre')}</span></span>`;
-    b.onclick = () => { DB.sel = c.id; save(); renderAll(); };
+  const list=$('#colist'); list.innerHTML='';
+  DB.cos.forEach((c,idx)=>{
+    const b=document.createElement('button');
+    b.className='co'; b.setAttribute('aria-current',c.id===DB.sel);
+    b.setAttribute('draggable','true');
+    const dot = c.decision==='Comprar'?'var(--good)':c.decision==='No invertir'?'var(--bad)':'var(--acc2)';
+    b.innerHTML=`<svg class="co-drag" viewBox="0 0 12 12" fill="none"><circle cx="3.5" cy="3" r="1" fill="currentColor"/><circle cx="8.5" cy="3" r="1" fill="currentColor"/><circle cx="3.5" cy="6" r="1" fill="currentColor"/><circle cx="8.5" cy="6" r="1" fill="currentColor"/><circle cx="3.5" cy="9" r="1" fill="currentColor"/><circle cx="8.5" cy="9" r="1" fill="currentColor"/></svg>
+      <span class="co-dot" style="background:${dot}"></span>
+      <span class="co-meta"><span class="co-tk">${esc(c.ficha.ticker||'—')}</span><span class="co-nm">${esc(c.ficha.nombre||'sin nombre')}</span></span>`;
+    b.onclick=()=>{ DB.sel=c.id; save(); renderAll(); };
+    b.ondragstart=e=>{ dragSrc=idx; e.dataTransfer.effectAllowed='move'; };
+    b.ondragover=e=>{ e.preventDefault(); b.classList.add('drag-over'); };
+    b.ondragleave=()=>b.classList.remove('drag-over');
+    b.ondrop=e=>{ e.preventDefault(); b.classList.remove('drag-over');
+      if(dragSrc===null||dragSrc===idx) return;
+      const arr=DB.cos; const [item]=arr.splice(dragSrc,1); arr.splice(idx,0,item);
+      dragSrc=null; save(); renderRail(); };
     list.appendChild(b);
   });
-  $('#noCo').classList.toggle('hidden', DB.cos.length > 0);
-  $('#tab-carga').style.display = DB.cos.length ? '' : 'none';
-  if(!DB.cos.length) $('#tab-metricas').classList.add('hidden');
+  $('#noCo').classList.toggle('hidden',DB.cos.length>0);
+  if(!DB.cos.length){ $('#tab-carga').classList.add('hidden'); $('#tab-metricas').classList.add('hidden'); }
+  else{ const t=activeTab(); if(t==='carga') $('#tab-carga').classList.remove('hidden'); }
 }
-const esc = s => String(s ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const activeTab = ()=> $$('.tab').find(b=>b.getAttribute('aria-selected')==='true')?.dataset.tab||'carga';
 
-$('#newCo').onclick = () => {
-  const c = blank(); DB.cos.push(c); DB.sel = c.id; save(); renderAll();
-  setTimeout(()=> $('#f_nombre')?.focus(), 60);
-};
+$('#newCo').onclick=()=>{ const c=blank(); DB.cos.push(c); DB.sel=c.id; save(); renderAll(); setTimeout(()=>$('#f_nombre')?.focus(),60); };
 
-/* =====================================================================
-   TAB CARGA — ficha
-   ===================================================================== */
-const FICHA = [
-  ['nombre','Empresa','text'], ['ticker','Ticker','text'],
-  ['mercado','Mercado / país','text'], ['industria','Industria','text'],
-  ['tipo','Tipo de activo','select',['Acción','ETF','Cripto','Commodity','Otro']],
+/* ============================================================ FICHA ---- */
+const FICHA_FIELDS = [
+  ['nombre','Empresa','text'],['ticker','Ticker','text'],
+  ['mercado','Mercado','text'],['industria','Industria','text'],
+  ['tipo','Tipo','select',['Acción','ETF','Cripto','Commodity','Otro']],
   ['horizonte','Horizonte','select',['Largo plazo','Mediano plazo','Corto plazo']]
 ];
 function renderFicha(){
-  const c = co(); if(!c) return;
-  const box = $('#ficha'); box.innerHTML = '';
-  FICHA.forEach(([k,label,type,opts]) => {
-    const d = document.createElement('div');
-    if(type === 'select'){
-      d.innerHTML = `<label class="lab" for="f_${k}">${label}</label>
+  const c=co(); if(!c) return;
+  const box=$('#fichaGrid'); box.innerHTML='';
+  FICHA_FIELDS.forEach(([k,label,type,opts])=>{
+    const d=document.createElement('div');
+    if(type==='select'){
+      d.innerHTML=`<label class="lab" for="f_${k}">${label}</label>
         <select class="field" id="f_${k}">${opts.map(o=>`<option ${c.ficha[k]===o?'selected':''}>${o}</option>`).join('')}</select>`;
     } else {
-      d.innerHTML = `<label class="lab" for="f_${k}">${label}</label>
+      d.innerHTML=`<label class="lab" for="f_${k}">${label}</label>
         <input class="field" id="f_${k}" value="${esc(c.ficha[k])}">`;
     }
     box.appendChild(d);
-    const el = d.querySelector('.field');
-    el.oninput = el.onchange = () => { c.ficha[k] = el.value; save(); renderRail(); renderCtx(); };
+    const el=d.querySelector('.field');
+    el.oninput=el.onchange=()=>{ c.ficha[k]=el.value; save(); renderRail(); renderCtx(); };
   });
 }
 function renderCtx(){
-  const c = co(); if(!c) return;
-  $('#ctxName').textContent = c.ficha.ticker ? `${c.ficha.ticker} · ${c.ficha.nombre || ''}` : '';
-  $('#mName').textContent = c.ficha.nombre || c.ficha.ticker || 'Sin nombre';
-  $('#mHead').textContent = [c.ficha.ticker, c.ficha.mercado, c.ficha.industria, c.ficha.horizonte].filter(Boolean).join(' · ');
+  const c=co(); if(!c) return;
+  $('#ctxLabel').textContent=c.ficha.ticker?`${c.ficha.ticker} · ${c.ficha.nombre||''}`:'';
+  $('#mName').textContent=c.ficha.nombre||c.ficha.ticker||'Sin nombre';
+  $('#mHead').textContent=[c.ficha.ticker,c.ficha.mercado,c.ficha.industria,c.ficha.horizonte].filter(Boolean).join(' · ');
 }
 
-/* =====================================================================
-   TAB CARGA — captura de fuentes
-   ===================================================================== */
-const drop = $('#drop'), fileInput = $('#fileInput');
-drop.onclick = () => fileInput.click();
-drop.onkeydown = e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fileInput.click(); } };
-['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
-['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-fileInput.onchange = () => { handleFiles(fileInput.files); fileInput.value=''; };
+/* ============================================================ FUENTES ---- */
+const drop=$('#drop'), fileInput=$('#fileInput');
+drop.onclick=()=>fileInput.click();
+drop.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fileInput.click(); } };
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop',e=>handleFiles(e.dataTransfer.files));
+fileInput.onchange=()=>{ handleFiles(fileInput.files); fileInput.value=''; };
 
 async function handleFiles(files){
-  const c = co(); if(!c){ toast('Creá una empresa primero'); return; }
+  const c=co(); if(!c){ toast('Creá una empresa primero'); return; }
   for(const f of files){
-    let texto = '', tipo = f.name.split('.').pop().toLowerCase();
-    try{
-      if(tipo === 'pdf'){ texto = await readPDF(f); }
-      else { texto = await f.text(); }
-    }catch(err){ texto = ''; toast(`No se pudo leer ${f.name}`); }
-    c.fuentes.push({ id: uid(), tipo: tipo.toUpperCase(), nombre: f.name, texto, chars: texto.length });
+    let texto='', tipo=f.name.split('.').pop().toLowerCase();
+    try{ texto = tipo==='pdf' ? await readPDF(f) : await f.text(); }
+    catch(e){ toast('No se pudo leer '+f.name); }
+    c.fuentes.push({id:uid(),tipo:tipo.toUpperCase(),nombre:f.name,texto,chars:texto.length});
   }
   save(); renderSrcs();
 }
 async function readPDF(file){
   if(!window.pdfjsLib) throw new Error('sin pdfjs');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-  let out = '';
-  for(let i=1; i<=pdf.numPages; i++){
-    const page = await pdf.getPage(i);
-    const tc = await page.getTextContent();
-    out += tc.items.map(it => it.str).join(' ') + '\n\n';
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  let out='';
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    out+=(await page.getTextContent()).items.map(it=>it.str).join(' ')+'\n\n';
   }
   return out.trim();
 }
 
-$('#addUrl').onclick = async () => {
-  const c = co(); if(!c){ toast('Creá una empresa primero'); return; }
-  const u = $('#urlInput').value.trim(); if(!u) return;
-  let texto = '', nombre = u;
-  if(API){
-    try{
-      const r = await fetch('/api/fetch', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})});
-      const j = await r.json(); texto = j.text || ''; nombre = j.title || u;
-    }catch(e){ toast('No se pudo leer el link, quedó guardado igual'); }
-  }
-  c.fuentes.push({ id: uid(), tipo:'URL', nombre, url:u, texto, chars: texto.length });
-  $('#urlInput').value = ''; save(); renderSrcs();
+$('#addUrl').onclick=async()=>{
+  const c=co(); if(!c){ toast('Creá una empresa primero'); return; }
+  const u=$('#urlInput').value.trim(); if(!u) return;
+  let texto='',nombre=u;
+  if(API){ try{ const r=await fetch('/api/fetch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})}); const j=await r.json(); texto=j.text||''; nombre=j.title||u; }catch(e){ toast('Link guardado sin texto'); } }
+  c.fuentes.push({id:uid(),tipo:'URL',nombre,url:u,texto,chars:texto.length});
+  $('#urlInput').value=''; save(); renderSrcs();
 };
 
-$('#addText').onclick = () => {
-  const c = co(); if(!c){ toast('Creá una empresa primero'); return; }
-  const t = $('#textInput').value.trim(); if(!t) return;
-  const first = t.split('\n')[0].slice(0, 46);
-  c.fuentes.push({ id: uid(), tipo:'TEXTO', nombre: first || 'Nota pegada', texto: t, chars: t.length });
-  $('#textInput').value = ''; $('#charCount').textContent = ''; save(); renderSrcs();
+$('#addText').onclick=()=>{
+  const c=co(); if(!c){ toast('Creá una empresa primero'); return; }
+  const t=$('#textInput').value.trim(); if(!t) return;
+  c.fuentes.push({id:uid(),tipo:'TEXTO',nombre:t.split('\n')[0].slice(0,46)||'Nota',texto:t,chars:t.length});
+  $('#textInput').value=''; $('#charCount').textContent=''; save(); renderSrcs();
 };
-$('#textInput').oninput = e => {
-  const n = e.target.value.length;
-  $('#charCount').textContent = n ? `${n.toLocaleString('es-AR')} caracteres` : '';
-};
+$('#textInput').oninput=e=>{ const n=e.target.value.length; $('#charCount').textContent=n?`${n.toLocaleString('es-AR')} car.`:''; };
 
 function renderSrcs(){
-  const c = co(); if(!c) return;
-  const box = $('#srcs'); box.innerHTML = '';
-  if(!c.fuentes.length){
-    box.innerHTML = `<span class="note">Todavía no cargaste nada. El análisis necesita al menos una fuente.</span>`;
-    return;
-  }
-  c.fuentes.forEach(f => {
-    const el = document.createElement('span');
-    el.className = 'src';
-    const ok = f.chars > 40;
-    el.innerHTML = `<span class="ck" style="background:${ok?'var(--mint)':'var(--apricot)'}">
-        <svg viewBox="0 0 12 12" fill="none"><path d="M2 6.2 4.6 9 10 3.2" stroke="#0d3d2b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
-      <span class="tag">${esc(f.tipo)}</span><b>${esc(f.nombre)}</b>
-      <span class="note num">${ok ? (f.chars>999 ? (f.chars/1000).toFixed(1)+'k' : f.chars) : 'sin texto'}</span>
-      <button class="x" title="Quitar">×</button>`;
-    el.querySelector('.x').onclick = () => { c.fuentes = c.fuentes.filter(x=>x.id!==f.id); save(); renderSrcs(); };
+  const c=co(); if(!c) return;
+  const box=$('#srcs'); box.innerHTML='';
+  if(!c.fuentes.length){ box.innerHTML=`<span class="note">Todavía no cargaste nada.</span>`; return; }
+  c.fuentes.forEach(f=>{
+    const el=document.createElement('span');
+    el.className='src-chip';
+    const ok=f.chars>40;
+    el.innerHTML=`<span class="src-ck" style="background:${ok?'var(--good)':'var(--warn)'}"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6 4.5 9 10 3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="src-type">${esc(f.tipo)}</span><b style="font-weight:500">${esc(f.nombre)}</b>
+      <span class="note">${ok?(f.chars>999?(f.chars/1000).toFixed(1)+'k':f.chars):'sin texto'}</span>
+      <button class="src-x" title="Quitar">×</button>`;
+    el.querySelector('.src-x').onclick=()=>{ c.fuentes=c.fuentes.filter(x=>x.id!==f.id); save(); renderSrcs(); };
     box.appendChild(el);
   });
-  const total = c.fuentes.reduce((a,b)=>a+b.chars,0);
-  const s = document.createElement('span');
-  s.className = 'note'; s.style.alignSelf='center';
-  s.textContent = `${c.fuentes.length} fuentes · ${(total/1000).toFixed(1)}k caracteres listos`;
+  const total=c.fuentes.reduce((a,b)=>a+b.chars,0);
+  const s=document.createElement('span'); s.className='note'; s.style.alignSelf='center';
+  s.textContent=`${c.fuentes.length} fuentes · ${(total/1000).toFixed(1)}k car.`;
   box.appendChild(s);
 }
 
-/* =====================================================================
-   TAB CARGA — los tres pasos
-   ===================================================================== */
-const PASOS = [
-  { k:'p1', n:1, t:'Entender el negocio', s:'Qué vende, a quién, qué problema resuelve, cómo gana plata y qué lo hace difícil de copiar.' },
-  { k:'p2', n:2, t:'Los números y su historia', s:'Ingresos, márgenes, caja, deuda, retornos sobre capital y qué cambió de verdad en los últimos años.' },
-  { k:'p3', n:3, t:'Análisis técnico del negocio', s:'Motor del crecimiento, unit economics, asignación de capital, riesgo de disrupción y qué descuenta el precio.' }
+/* ============================================================ PASOS ---- */
+const PASOS=[
+  {k:'p1',n:1,t:'Entender el negocio',s:'Qué vende, a quién, cómo gana plata, por qué es difícil de copiar.'},
+  {k:'p2',n:2,t:'Los números y su historia',s:'Ingresos, márgenes, caja, deuda, retornos sobre capital.'},
+  {k:'p3',n:3,t:'Análisis técnico del negocio',s:'Motor del crecimiento, unit economics, moat, disrupción, qué descuenta el precio.'}
 ];
 function renderSteps(){
-  const c = co(); if(!c) return;
-  const box = $('#steps'); box.innerHTML = '';
-  PASOS.forEach(p => {
-    const d = document.createElement('details');
-    d.className = 'step'; d.open = !!c.pasos[p.k];
-    const done = !!c.pasos[p.k];
-    d.innerHTML = `
-      <summary>
-        <span class="idx">${p.n}</span>
-        <span class="ttl">${p.t}<em>${p.s}</em></span>
-        <span class="st" data-st>${done ? (c.pasos[p.k].length>999?(c.pasos[p.k].length/1000).toFixed(1)+'k car.':c.pasos[p.k].length+' car.') : 'vacío'}</span>
-        <svg class="chev" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  const c=co(); if(!c) return;
+  const box=$('#steps'); box.innerHTML='';
+  PASOS.forEach(p=>{
+    const d=document.createElement('details');
+    d.className='step'; d.open=!!c.pasos[p.k];
+    const done=!!c.pasos[p.k];
+    d.innerHTML=`<summary>
+        <span class="step-idx">${p.n}</span>
+        <span class="step-ttl">${p.t}<em>${p.s}</em></span>
+        <span class="step-st" data-st>${done?(c.pasos[p.k].length>999?(c.pasos[p.k].length/1000).toFixed(1)+'k car.':c.pasos[p.k].length+' car.'):'vacío'}</span>
+        <svg class="step-chev" width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </summary>
-      <div class="body">
-        <textarea placeholder="Generá el paso con el modelo, o escribilo vos.">${esc(c.pasos[p.k])}</textarea>
-        <div style="display:flex;gap:8px;margin-top:8px">
+      <div class="step-body">
+        <textarea class="step-ta" placeholder="Generá con el modelo o escribilo vos.">${esc(c.pasos[p.k])}</textarea>
+        <div class="row" style="margin-top:6px">
           <button class="btn sm" data-run>Generar este paso</button>
         </div>
       </div>`;
-    const ta = d.querySelector('textarea');
-    ta.oninput = () => { c.pasos[p.k] = ta.value; save(); d.querySelector('[data-st]').textContent = ta.value.length + ' car.'; };
-    d.querySelector('[data-run]').onclick = () => runStep(p.k);
+    const ta=d.querySelector('textarea');
+    ta.oninput=()=>{ c.pasos[p.k]=ta.value; save(); d.querySelector('[data-st]').textContent=ta.value.length+' car.'; };
+    d.querySelector('[data-run]').onclick=()=>runStep(p.k);
     box.appendChild(d);
   });
 }
 
-function fuentesTexto(c, limit = 90000){
-  let out = '';
-  for(const f of c.fuentes){
-    if(!f.texto) continue;
-    out += `\n\n### FUENTE: ${f.nombre} (${f.tipo})\n${f.texto}`;
-    if(out.length > limit) break;
-  }
-  return out.slice(0, limit);
+function fuentesTexto(c,limit=90000){
+  let out='';
+  for(const f of c.fuentes){ if(!f.texto) continue; out+=`\n\n### ${f.nombre}\n${f.texto}`; if(out.length>limit) break; }
+  return out.slice(0,limit);
 }
 
 async function runStep(k){
-  const c = co(); if(!c) return;
+  const c=co(); if(!c) return;
   if(!c.fuentes.some(f=>f.texto)){ toast('Cargá al menos una fuente con texto'); return; }
-  if(!API){ toast('Sin backend conectado: escribí el paso a mano o desplegá el servidor'); return; }
-  const idx = PASOS.findIndex(p=>p.k===k);
-  const det = $$('#steps .step')[idx]; const st = det.querySelector('[data-st]');
-  st.textContent = 'pensando…'; st.classList.add('pulse'); det.open = true;
+  if(!API){ toast('Sin backend: escribí el paso a mano'); return; }
+  const idx=PASOS.findIndex(p=>p.k===k);
+  const det=$$('#steps .step')[idx]; const st=det.querySelector('[data-st]');
+  st.textContent='pensando…'; st.classList.add('pulse-anim'); det.open=true;
   try{
-    const r = await fetch('/api/analyze', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ paso:k, ficha:c.ficha, previo:c.pasos, fuentes: fuentesTexto(c) })
-    });
-    const j = await r.json();
-    if(j.error) throw new Error(j.error);
-    c.pasos[k] = j.texto || ''; save();
-    det.querySelector('textarea').value = c.pasos[k];
-    st.textContent = c.pasos[k].length + ' car.';
-    det.classList.add('reveal');
-  }catch(e){ st.textContent = 'falló'; toast('El modelo no respondió: ' + e.message); }
-  finally{ st.classList.remove('pulse'); }
+    const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paso:k,ficha:c.ficha,previo:c.pasos,fuentes:fuentesTexto(c)})});
+    const j=await r.json(); if(j.error) throw new Error(j.error);
+    c.pasos[k]=j.texto||''; save();
+    det.querySelector('textarea').value=c.pasos[k];
+    st.textContent=c.pasos[k].length+' car.';
+  }catch(e){ st.textContent='falló'; toast('Modelo: '+e.message); }
+  finally{ st.classList.remove('pulse-anim'); }
 }
 
-$('#runAll').onclick = async () => {
-  const c = co(); if(!c) return;
-  if(!API){ toast('Sin backend: usá el ejemplo o escribí los pasos a mano'); return; }
-  $('#runAll').disabled = true; $('#runAll').textContent = 'Analizando…';
-  for(const p of PASOS){ await runStep(p.k); }
-  $('#runAll').disabled = false; $('#runAll').textContent = 'Analizar las fuentes';
+$('#runAll').onclick=async()=>{
+  const c=co(); if(!c) return;
+  if(!API){ toast('Sin backend'); return; }
+  $('#runAll').disabled=true; $('#runAll').textContent='Analizando…';
+  for(const p of PASOS) await runStep(p.k);
+  $('#runAll').disabled=false; $('#runAll').textContent='Analizar fuentes';
   toast('Análisis listo');
 };
 
-$('#extractBtn').onclick = async () => {
-  const c = co(); if(!c) return;
-  const texto = [c.pasos.p1, c.pasos.p2, c.pasos.p3].join('\n\n');
-  if(texto.trim().length < 100){ toast('Primero generá o escribí el análisis'); return; }
-  if(!API){ toast('Sin backend: cargá los números a mano en Métricas'); go('metricas'); return; }
-  $('#extractBtn').disabled = true; $('#extractBtn').textContent = 'Extrayendo…';
+$('#autoFichaBtn').onclick=async()=>{
+  const c=co(); if(!c) return;
+  if(!c.fuentes.some(f=>f.texto)){ toast('Cargá al menos una fuente primero'); return; }
+  if(!API){ toast('Sin backend: completá la ficha a mano'); return; }
+  $('#autoFichaBtn').disabled=true; $('#autoFichaBtn').textContent='Completando…';
   try{
-    const r = await fetch('/api/extract', { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ ficha:c.ficha, analisis: texto }) });
-    const j = await r.json();
-    if(j.error) throw new Error(j.error);
-    Object.assign(c.kpi, cleanObj(j.kpi));
-    Object.assign(c.val, cleanObj(j.val));
-    if(j.moat) Object.assign(c.moat, j.moat);
-    if(j.scn) ['bear','base','bull'].forEach(s => j.scn[s] && Object.assign(c.scn[s], cleanObj(j.scn[s])));
-    if(j.riesgos) c.riesgos = j.riesgos;
-    if(j.catal) c.catal = j.catal;
-    if(j.invalida) c.invalida = j.invalida;
-    if(j.tesis) c.tesis = j.tesis;
-    if(j.decision) c.decision = j.decision;
-    if(j.conviccion) c.conviccion = j.conviccion;
-    save(); renderMetricas(); go('metricas'); toast('Métricas cargadas al tablero');
-  }catch(e){ toast('No se pudieron extraer: ' + e.message); }
-  finally{ $('#extractBtn').disabled = false; $('#extractBtn').textContent = 'Extraer métricas al tablero'; }
+    const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({paso:'ficha',ficha:c.ficha,previo:c.pasos,fuentes:fuentesTexto(c,20000)})});
+    const j=await r.json(); if(j.error) throw new Error(j.error);
+    if(j.ficha) Object.assign(c.ficha,j.ficha);
+    save(); renderFicha(); renderCtx(); renderRail(); toast('Ficha completada');
+  }catch(e){ toast('No se pudo autocompletar: '+e.message); }
+  finally{ $('#autoFichaBtn').disabled=false; $('#autoFichaBtn').textContent='Autocompletar ficha'; }
 };
-function cleanObj(o){ const r = {}; for(const k in (o||{})) if(o[k] !== null && o[k] !== '') r[k] = String(o[k]); return r; }
 
-/* =====================================================================
-   TAB MÉTRICAS — KPIs
-   ===================================================================== */
-const KPIS = [
-  ['ingresos','Ingresos TTM','M$','tint-a'], ['crecIngresos','Crecimiento ingresos','%','tint-a'],
-  ['mBruto','Margen bruto','%','tint-b'], ['mOperativo','Margen operativo','%','tint-b'],
-  ['mNeto','Margen neto','%','tint-b'], ['fcf','Free cash flow','M$','tint-c'],
-  ['roic','ROIC','%','tint-d'], ['roe','ROE','%','tint-d'],
-  ['wacc','WACC','%','tint-d'], ['per','PER actual','x',''],
-  ['perHist','PER promedio histórico','x',''], ['deudaNeta','Deuda neta','M$','']
+$('#extractBtn').onclick=async()=>{
+  const c=co(); if(!c) return;
+  const texto=[c.pasos.p1,c.pasos.p2,c.pasos.p3].join('\n\n');
+  if(texto.trim().length<100){ toast('Primero generá el análisis'); return; }
+  if(!API){ toast('Sin backend: cargá los números a mano'); go('metricas'); return; }
+  $('#extractBtn').disabled=true; $('#extractBtn').textContent='Extrayendo…';
+  try{
+    const r=await fetch('/api/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ficha:c.ficha,analisis:texto})});
+    const j=await r.json(); if(j.error) throw new Error(j.error);
+    const clean=o=>{ const r={}; for(const k in (o||{})) if(o[k]!==null&&o[k]!=='') r[k]=String(o[k]); return r; };
+    Object.assign(c.kpi,clean(j.kpi));
+    Object.assign(c.val,clean(j.val));
+    if(j.moat) Object.assign(c.moat,j.moat);
+    if(j.scn) ['bear','base','bull'].forEach(s=>j.scn[s]&&Object.assign(c.scn[s],clean(j.scn[s])));
+    if(j.riesgos) c.riesgos=j.riesgos;
+    if(j.catal) c.catal=j.catal;
+    if(j.invalida) c.invalida=j.invalida;
+    if(j.tesis) c.tesis=j.tesis;
+    if(j.proyecciones) c.proyecciones=j.proyecciones;
+    if(j.decision) c.decision=j.decision;
+    if(j.conviccion) c.conviccion=j.conviccion;
+    save(); renderMetricas(); go('metricas'); toast('Métricas al tablero');
+  }catch(e){ toast('No se pudo extraer: '+e.message); }
+  finally{ $('#extractBtn').disabled=false; $('#extractBtn').textContent='→ Extraer al tablero'; }
+};
+
+/* ============================================================ KPIs / TABLERO drag-drop ---- */
+const ALL_METRICS = [
+  ['ingresos','Ingresos TTM','M$','tint-a'],['crecIngresos','Crec. ingresos','%','tint-a'],
+  ['mBruto','Margen bruto','%','tint-b'],['mOperativo','Margen operativo','%','tint-b'],
+  ['mNeto','Margen neto','%','tint-b'],['fcf','Free cash flow','M$','tint-a'],
+  ['roic','ROIC','%','tint-c'],['roe','ROE','%','tint-c'],
+  ['wacc','WACC','%','tint-c'],['per','PER actual','x',''],
+  ['perHist','PER histórico','x',''],['deudaNeta','Deuda neta','M$','']
 ];
-function renderKPIs(){
-  const c = co(); if(!c) return;
-  const box = $('#kpis'); box.innerHTML = '';
-  KPIS.forEach(([k,label,unit,tint]) => {
-    const d = document.createElement('div');
-    d.className = 'kpi ' + tint;
-    d.innerHTML = `<span class="k">${label}</span>
-      <div class="v"><input class="num" id="k_${k}" value="${esc(c.kpi[k])}" placeholder="—" inputmode="decimal"><span class="u">${unit}</span></div>
-      <div class="hint" data-hint></div>`;
-    box.appendChild(d);
-    const inp = d.querySelector('input');
-    inp.oninput = () => { c.kpi[k] = inp.value; save(); hints(); renderExport(); };
+const metricMap = Object.fromEntries(ALL_METRICS.map(([k,l,u,t])=>[k,{label:l,unit:u,tint:t}]));
+
+let dashDragKey=null;
+
+function renderDash(){
+  const c=co(); if(!c) return;
+  const dash=c.dashMetrics||[];
+  const pool=ALL_METRICS.map(([k])=>k).filter(k=>!dash.includes(k));
+
+  // --- banco ---
+  const poolEl=$('#metricPool'); poolEl.innerHTML='';
+  pool.forEach(k=>{
+    const {label}=metricMap[k];
+    const tag=document.createElement('span'); tag.className='metric-tag'; tag.draggable=true;
+    tag.innerHTML=`<span>${esc(label)}</span>`;
+    tag.ondragstart=e=>{ dashDragKey=k; e.dataTransfer.effectAllowed='move'; tag.style.opacity='.5'; };
+    tag.ondragend=()=>{ tag.style.opacity=''; };
+    tag.onclick=()=>{ c.dashMetrics.push(k); save(); renderDash(); };
+    poolEl.appendChild(tag);
   });
-  hints();
+  poolEl.ondragover=e=>{ e.preventDefault(); poolEl.classList.add('drag-over'); };
+  poolEl.ondragleave=()=>poolEl.classList.remove('drag-over');
+  poolEl.ondrop=e=>{ e.preventDefault(); poolEl.classList.remove('drag-over');
+    if(!dashDragKey) return;
+    c.dashMetrics=c.dashMetrics.filter(k=>k!==dashDragKey); dashDragKey=null;
+    save(); renderDash(); };
+
+  // --- tablero ---
+  const grid=$('#kpiDashboard'); grid.innerHTML='';
+  if(!dash.length){ grid.innerHTML=`<div class="note" style="grid-column:1/-1;padding:20px 0">Arrastrá métricas desde arriba para armar tu tablero.</div>`; return; }
+  dash.forEach((k,idx)=>{
+    const {label,unit,tint}=metricMap[k]||{label:k,unit:'',tint:''};
+    const card=document.createElement('div'); card.className='kpi-card '+tint; card.draggable=true;
+    card.innerHTML=`<span class="kpi-k">${esc(label)}</span>
+      <div class="kpi-v"><input class="kpi-input mono" id="ki_${k}" value="${esc(c.kpi[k]||'')}" placeholder="—" inputmode="decimal"><span class="kpi-u">${esc(unit)}</span></div>
+      <div class="kpi-hint" data-hint></div>
+      <button class="btn ghost sm" style="position:absolute;top:4px;right:4px;opacity:.4;padding:2px 5px" data-remove>×</button>`;
+    card.ondragstart=e=>{ dashDragKey=k; e.dataTransfer.effectAllowed='move'; };
+    card.ondragover=e=>{ e.preventDefault(); card.classList.add('drag-over'); };
+    card.ondragleave=()=>card.classList.remove('drag-over');
+    card.ondrop=e=>{ e.preventDefault(); card.classList.remove('drag-over');
+      if(!dashDragKey||dashDragKey===k) return;
+      const a=c.dashMetrics, fi=a.indexOf(dashDragKey), ti=a.indexOf(k);
+      [a[fi],a[ti]]=[a[ti],a[fi]]; dashDragKey=null; save(); renderDash(); };
+    card.querySelector('[data-remove]').onclick=e=>{ e.stopPropagation();
+      c.dashMetrics=c.dashMetrics.filter(m=>m!==k); save(); renderDash(); };
+    const inp=card.querySelector('input');
+    inp.oninput=()=>{ c.kpi[k]=inp.value; save(); updateHints(); renderExport(); };
+    grid.appendChild(card);
+  });
+  updateHints();
 }
-function hints(){
-  const c = co(); if(!c) return;
-  const H = {
-    roic: () => { const s = nz(c.kpi.roic) - nz(c.kpi.wacc); if(!nz(c.kpi.roic)||!nz(c.kpi.wacc)) return '';
-      return s > 0 ? `crea valor · spread +${s.toFixed(1)} pts` : `destruye valor · spread ${s.toFixed(1)} pts`; },
-    per: () => { const a = nz(c.kpi.per), h = nz(c.kpi.perHist); if(!a||!h) return '';
-      const d = (a/h-1)*100; return d > 0 ? `${d.toFixed(0)}% sobre su historia` : `${Math.abs(d).toFixed(0)}% bajo su historia`; },
-    mOperativo: () => { const b = nz(c.kpi.mBruto), o = nz(c.kpi.mOperativo); if(!b||!o) return '';
-      return `${(o/b*100).toFixed(0)}% del bruto llega a operativo`; },
-    fcf: () => { const f = nz(c.kpi.fcf), i = nz(c.kpi.ingresos); if(!f||!i) return '';
-      return `${(f/i*100).toFixed(1)}% de las ventas se vuelven caja`; }
+
+function updateHints(){
+  const c=co(); if(!c) return;
+  const roic=nz(c.kpi.roic), wacc=nz(c.kpi.wacc), per=nz(c.kpi.per), ph=nz(c.kpi.perHist);
+  const H={
+    roic:()=>(roic&&wacc)?`spread ${roic>wacc?'+':''}${(roic-wacc).toFixed(1)} pts`:'',
+    per:()=>(per&&ph)?`${((per/ph-1)*100).toFixed(0)}% vs historia`:'',
+    mOperativo:()=>{ const b=nz(c.kpi.mBruto), o=nz(c.kpi.mOperativo); return (b&&o)?`${(o/b*100).toFixed(0)}% del bruto`:''; },
+    fcf:()=>{ const f=nz(c.kpi.fcf), i=nz(c.kpi.ingresos); return (f&&i)?`${(f/i*100).toFixed(1)}% de ventas`:''; }
   };
-  KPIS.forEach(([k]) => {
-    const el = $(`#k_${k}`)?.closest('.kpi')?.querySelector('[data-hint]');
+  c.dashMetrics.forEach(k=>{
+    const el=$(`#ki_${k}`)?.closest('.kpi-card')?.querySelector('[data-hint]');
     if(!el) return;
-    const txt = H[k] ? H[k]() : '';
-    el.textContent = txt;
-    el.style.color = /destruye|sobre su historia/.test(txt) ? 'var(--warn)' : 'var(--ink-3)';
+    el.textContent=H[k]?H[k]():'';
   });
 }
 
-/* =====================================================================
-   TAB MÉTRICAS — motor de valoración
-   ===================================================================== */
-const VAL_INPUTS = [
-  ['precio','Precio hoy','$'], ['acciones','Acciones en circulación','M'],
-  ['caja','Caja y equivalentes','M$'], ['deuda','Deuda total','M$'],
-  ['ventasBase','Ventas año 1 estimadas','M$'], ['margenFcf','Margen FCF / ventas','%'],
-  ['crec15','Crecimiento ventas años 1–5','%'], ['crec610','Crecimiento ventas años 6–10','%'],
-  ['tasaK','Tasa de descuento K','%'], ['multiplo','Múltiplo de salida EV/FCF','x'],
-  ['fclBase','FCL base (perpetuidad)','M$'], ['g','Crecimiento perpetuo g','%']
+/* ============================================================ VALORACIÓN ---- */
+const VAL_INPUTS=[
+  ['precio','Precio hoy','$'],['acciones','Acciones','M'],
+  ['caja','Caja','M$'],['deuda','Deuda','M$'],
+  ['ventasBase','Ventas año 1','M$'],['margenFcf','Margen FCF','%'],
+  ['crec15','Crec. años 1-5','%'],['crec610','Crec. años 6-10','%'],
+  ['tasaK','Tasa K','%'],['multiplo','Múltiplo salida','x']
 ];
 function renderValInputs(){
-  const c = co(); if(!c) return;
-  const box = $('#valInputs'); box.innerHTML = '';
-  VAL_INPUTS.forEach(([k,label,u]) => {
-    const d = document.createElement('div');
-    d.innerHTML = `<label class="lab" for="v_${k}">${label} <span style="color:var(--ink-3)">${u}</span></label>
-      <input class="field num" id="v_${k}" value="${esc(c.val[k])}" inputmode="decimal" placeholder="—">`;
+  const c=co(); if(!c) return;
+  const box=$('#valInputs'); box.innerHTML='';
+  VAL_INPUTS.forEach(([k,label,u])=>{
+    const d=document.createElement('div');
+    d.innerHTML=`<label class="lab" for="v_${k}">${label} <span style="color:var(--ink-3)">${u}</span></label>
+      <input class="field mono" id="v_${k}" value="${esc(c.val[k])}" inputmode="decimal" placeholder="—">`;
     box.appendChild(d);
-    d.querySelector('input').oninput = e => { c.val[k] = e.target.value; save(); renderValuation(); renderExport(); };
+    d.querySelector('input').oninput=e=>{ c.val[k]=e.target.value; save(); renderValuation(); renderExport(); };
   });
 }
 
-/* Modelo A · flujos 10 años + múltiplo de salida (el del Excel base) */
-function modeloMultiplo(v, ov = {}){
-  const ventas0 = nz(v.ventasBase);
-  const m   = nz(ov.margenFcf ?? v.margenFcf) / 100;
-  const g15 = nz(ov.crec15   ?? v.crec15) / 100;
-  const g610= nz(ov.crec610  ?? v.crec610 ?? v.crec15) / 100;
-  const K   = nz(v.tasaK) / 100;
-  const mult= nz(ov.multiplo ?? v.multiplo);
-  if(!ventas0 || !m || !K) return null;
-
-  const rows = []; let ventas = ventas0, vpFcf = 0;
-  for(let t = 1; t <= 10; t++){
-    if(t > 1) ventas *= (1 + (t <= 5 ? g15 : g610));
-    const fcf = ventas * m;
-    const df = Math.pow(1 + K, t);
-    const vp = fcf / df;
-    vpFcf += vp;
-    rows.push({ t, ventas, fcf, df, vp });
+function modeloMultiplo(v,ov={}){
+  const v0=nz(v.ventasBase),m=nz(ov.margenFcf??v.margenFcf)/100,g15=nz(ov.crec15??v.crec15)/100,
+    g610=nz(ov.crec610??v.crec610??v.crec15)/100,K=nz(v.tasaK)/100,mult=nz(ov.multiplo??v.multiplo);
+  if(!v0||!m||!K) return null;
+  let ventas=v0,vpFcf=0,rows=[];
+  for(let t=1;t<=10;t++){
+    if(t>1) ventas*=(1+(t<=5?g15:g610));
+    const fcf=ventas*m,df=Math.pow(1+K,t);
+    vpFcf+=fcf/df; rows.push({t,ventas,fcf,df,vp:fcf/df});
   }
-  const fcfFinal = rows[9].fcf;
-  const evTerm = fcfFinal * mult;
-  const vpTerm = evTerm / Math.pow(1 + K, 10);
-  const ev = vpFcf + vpTerm;
-  const equity = ev + nz(v.caja) - nz(v.deuda);
-  const acc = nz(v.acciones);
-  return { rows, vpFcf, evTerm, vpTerm, ev, equity, porAccion: acc ? equity / acc : 0 };
+  const evTerm=rows[9].fcf*mult,vpTerm=evTerm/Math.pow(1+K,10),ev=vpFcf+vpTerm;
+  const equity=ev+nz(v.caja)-nz(v.deuda);
+  return {rows,vpFcf,evTerm,vpTerm,ev,equity,porAccion:nz(v.acciones)?equity/nz(v.acciones):0};
 }
 
-/* Modelo B · 5 años + perpetuidad de Gordon */
-function modeloGordon(v){
-  const fcl = nz(v.fclBase), w = nz(v.tasaK)/100, g = nz(v.g)/100, gr = nz(v.crec15)/100;
-  if(!fcl || !w || w <= g) return null;
-  let f = fcl, vp = 0, rows = [];
-  for(let t = 1; t <= 5; t++){
-    f *= (1 + gr);
-    const d = Math.pow(1 + w, t);
-    vp += f / d; rows.push({t, f, vp: f/d});
-  }
-  const vt = f * (1 + g) / (w - g);
-  const vpVt = vt / Math.pow(1 + w, 5);
-  const ev = vp + vpVt;
-  const equity = ev + nz(v.caja) - nz(v.deuda);
-  const acc = nz(v.acciones);
-  return { ev, vt, equity, porAccion: acc ? equity / acc : 0 };
-}
+const fmt=(n,d=2)=>(!isFinite(n)?'—':n.toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d}));
+const fmtM=n=>{ if(!isFinite(n)) return '—'; const a=Math.abs(n); return a>=1e6?(n/1e6).toFixed(2)+'B':a>=1e3?(n/1e3).toFixed(1)+'k':n.toFixed(0); };
 
-const SCN = [
-  ['bear','Pesimista','Qué pasa si el crecimiento se corta y el mercado paga menos.'],
-  ['base','Base','Lo que realmente esperás que ocurra.'],
-  ['bull','Optimista','Todo lo que tiene que salir bien para justificar el entusiasmo.']
-];
+const SCN_DEF=[['bear','Pesimista'],['base','Base'],['bull','Optimista']];
 function renderScns(){
-  const c = co(); if(!c) return;
-  const box = $('#scns'); box.innerHTML = '';
-  SCN.forEach(([k,t,s]) => {
-    const d = document.createElement('div');
-    d.className = 'scn ' + k;
-    d.innerHTML = `<h4>${t}</h4><div class="note">${s}</div>
-      <div class="r num" data-r>—</div><div class="note" data-sub></div>
-      <div class="grid g3" style="margin-top:10px">
-        <div><label class="lab">Crec. %</label><input class="field num" data-f="crec15" value="${esc(c.scn[k].crec15)}" inputmode="decimal" placeholder="${esc(c.val.crec15)||'—'}"></div>
-        <div><label class="lab">Margen FCF %</label><input class="field num" data-f="margenFcf" value="${esc(c.scn[k].margenFcf)}" inputmode="decimal" placeholder="${esc(c.val.margenFcf)||'—'}"></div>
-        <div><label class="lab">Múltiplo x</label><input class="field num" data-f="multiplo" value="${esc(c.scn[k].multiplo)}" inputmode="decimal" placeholder="${esc(c.val.multiplo)||'—'}"></div>
+  const c=co(); if(!c) return;
+  const box=$('#scnsBox'); box.innerHTML='';
+  SCN_DEF.forEach(([k,t])=>{
+    const d=document.createElement('div'); d.className='scn '+k;
+    d.innerHTML=`<h4>${t}</h4>
+      <div class="scn-r mono" data-r>—</div><div class="note" data-sub></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px">
+        <div><label class="lab">Crec.%</label><input class="field mono" data-f="crec15" value="${esc(c.scn[k].crec15)}" inputmode="decimal" placeholder="${esc(c.val.crec15)||'—'}"></div>
+        <div><label class="lab">Mrg FCF%</label><input class="field mono" data-f="margenFcf" value="${esc(c.scn[k].margenFcf)}" inputmode="decimal" placeholder="${esc(c.val.margenFcf)||'—'}"></div>
+        <div><label class="lab">Múlt.x</label><input class="field mono" data-f="multiplo" value="${esc(c.scn[k].multiplo)}" inputmode="decimal" placeholder="${esc(c.val.multiplo)||'—'}"></div>
       </div>`;
-    d.querySelectorAll('input').forEach(inp => {
-      inp.oninput = () => { c.scn[k][inp.dataset.f] = inp.value; save(); renderValuation(); renderExport(); };
-    });
+    d.querySelectorAll('input').forEach(inp=>{ inp.oninput=()=>{ c.scn[k][inp.dataset.f]=inp.value; save(); renderValuation(); renderExport(); }; });
     box.appendChild(d);
   });
 }
 
-function scnResult(c, k){
-  const s = c.scn[k];
-  const ov = {};
-  if(s.crec15 !== '') ov.crec15 = s.crec15;
-  if(s.margenFcf !== '') ov.margenFcf = s.margenFcf;
-  if(s.multiplo !== '') ov.multiplo = s.multiplo;
-  return modeloMultiplo(c.val, ov);
-}
-
-function fmt(n, d = 2){
-  if(n === null || n === undefined || !isFinite(n)) return '—';
-  return n.toLocaleString('es-AR', { minimumFractionDigits: d, maximumFractionDigits: d });
-}
-function fmtM(n){
-  if(!isFinite(n)) return '—';
-  const a = Math.abs(n);
-  if(a >= 1e6) return (n/1e6).toFixed(2) + 'B';
-  if(a >= 1e3) return (n/1e3).toFixed(1) + 'k';
-  return n.toFixed(0);
+function scnResult(c,k){
+  const s=c.scn[k], ov={};
+  if(s.crec15!=='') ov.crec15=s.crec15;
+  if(s.margenFcf!=='') ov.margenFcf=s.margenFcf;
+  if(s.multiplo!=='') ov.multiplo=s.multiplo;
+  return modeloMultiplo(c.val,ov);
 }
 
 function renderValuation(){
-  const c = co(); if(!c) return;
-  const precio = nz(c.val.precio);
-  const res = { bear: scnResult(c,'bear'), base: scnResult(c,'base'), bull: scnResult(c,'bull') };
-
-  SCN.forEach(([k], i) => {
-    const card = $('#scns').children[i];
-    const r = res[k];
-    const rEl = card.querySelector('[data-r]'), sEl = card.querySelector('[data-sub]');
-    if(!r || !r.porAccion){ rEl.textContent = '—'; sEl.textContent = 'faltan supuestos'; return; }
-    rEl.textContent = '$' + fmt(r.porAccion, 2);
-    if(precio){
-      const up = (r.porAccion / precio - 1) * 100;
-      sEl.innerHTML = `<span class="${up>=0?'pos':'neg'}">${up>=0?'+':''}${up.toFixed(1)}%</span> contra el precio de hoy`;
-    } else sEl.textContent = 'valor por acción';
+  const c=co(); if(!c) return;
+  const precio=nz(c.val.precio);
+  const res={bear:scnResult(c,'bear'),base:scnResult(c,'base'),bull:scnResult(c,'bull')};
+  SCN_DEF.forEach(([k],i)=>{
+    const card=$('#scnsBox').children[i]; if(!card) return;
+    const r=res[k];
+    const rEl=card.querySelector('[data-r]'), sEl=card.querySelector('[data-sub]');
+    if(!r||!r.porAccion){ rEl.textContent='—'; sEl.textContent='faltan supuestos'; return; }
+    rEl.textContent='$'+fmt(r.porAccion,2);
+    if(precio){ const up=(r.porAccion/precio-1)*100; sEl.innerHTML=`<span class="${up>=0?'pos':'neg'}">${up>=0?'+':''}${up.toFixed(1)}%</span> vs precio hoy`; }
+    else sEl.textContent='valor por acción';
   });
-
   // gauge
-  const vals = ['bear','base','bull'].map(k => res[k]?.porAccion).filter(v => v && isFinite(v));
-  const bar = $('#gbar');
-  const marks = { tBear: res.bear?.porAccion, tBase: res.base?.porAccion, tBull: res.bull?.porAccion };
-  $('#gPrice').textContent = precio ? '$' + fmt(precio, 2) : '';
-  if(vals.length && precio){
-    const lo = Math.min(precio, ...vals) * 0.85, hi = Math.max(precio, ...vals) * 1.1;
-    const pct = x => clamp((x - lo) / (hi - lo) * 100, 0, 100);
-    for(const id in marks){
-      const el = $('#' + id);
-      if(marks[id]){ el.style.display=''; el.style.left = pct(marks[id]) + '%'; el.querySelector('b').textContent = `${id.slice(1).toLowerCase()} $${fmt(marks[id],0)}`; }
-      else el.style.display = 'none';
-    }
-    $('#gmark').style.display = ''; $('#gmark').style.left = pct(precio) + '%';
-    const b = res.base?.porAccion;
+  const vals=['bear','base','bull'].map(k=>res[k]?.porAccion).filter(v=>v&&isFinite(v));
+  $('#gPriceLabel').textContent=precio?'$'+fmt(precio,2):'';
+  if(vals.length&&precio){
+    const lo=Math.min(precio,...vals)*.85, hi=Math.max(precio,...vals)*1.1;
+    const pct=x=>clamp((x-lo)/(hi-lo)*100,0,100);
+    const marks={tBear:res.bear?.porAccion,tBase:res.base?.porAccion,tBull:res.bull?.porAccion};
+    for(const id in marks){ const el=$('#'+id); if(marks[id]){ el.style.display=''; el.style.left=pct(marks[id])+'%'; el.querySelector('b').textContent='$'+fmt(marks[id],0); } else el.style.display='none'; }
+    $('#gmark').style.display=''; $('#gmark').style.left=pct(precio)+'%';
+    const b=res.base?.porAccion;
     if(b){
-      const mos = (1 - precio / b) * 100;
-      const el = $('#mosVal');
-      el.textContent = (mos >= 0 ? '+' : '') + mos.toFixed(1) + '%';
-      el.className = 'big num ' + (mos >= 0 ? 'pos' : 'neg');
-      $('#mosNote').textContent = mos >= 25 ? 'Descuento amplio: el precio no exige que todo salga bien.'
-        : mos >= 0 ? 'Descuento chico: el margen de error es acotado.'
-        : 'El precio ya paga más de lo que el escenario base justifica.';
+      const mos=(1-precio/b)*100;
+      const mv=$('#mosVal'); mv.textContent=(mos>=0?'+':'')+mos.toFixed(1)+'%';
+      mv.className='mos-big mono '+(mos>=0?'pos':'neg');
+      $('#mosNote').textContent=mos>=25?'Descuento amplio: el precio no exige que todo salga bien.':mos>=0?'Descuento chico: el margen de error es acotado.':'El precio ya paga más de lo que el escenario base justifica.';
     }
   } else {
-    ['tBear','tBase','tBull','gmark'].forEach(id => $('#'+id).style.display = 'none');
-    $('#mosVal').textContent = '—'; $('#mosVal').className = 'big num';
-    $('#mosNote').textContent = 'Cargá precio, ventas, margen FCF y tasa para ver el rango.';
+    ['tBear','tBase','tBull','gmark'].forEach(id=>$('#'+id).style.display='none');
+    $('#mosVal').textContent='—'; $('#mosNote').textContent='Cargá precio, ventas, margen FCF y tasa K para ver el rango.';
   }
-
-  // tabla proyección
-  const b = res.base;
-  const T = $('#projTable');
+  // proyección
+  const b=res.base; const T=$('#projTable');
   if(b){
-    const yr = new Date().getFullYear();
-    T.innerHTML = `<thead><tr><th>Concepto</th>${b.rows.map(r=>`<th>${yr + r.t}</th>`).join('')}</tr></thead>
-      <tbody>
-        <tr><td>Ventas</td>${b.rows.map(r=>`<td class="v">${fmtM(r.ventas)}</td>`).join('')}</tr>
-        <tr><td>Free cash flow</td>${b.rows.map(r=>`<td class="v">${fmtM(r.fcf)}</td>`).join('')}</tr>
-        <tr><td>Factor de descuento</td>${b.rows.map(r=>`<td class="v">${r.df.toFixed(2)}</td>`).join('')}</tr>
-        <tr><td>Valor presente</td>${b.rows.map(r=>`<td class="v">${fmtM(r.vp)}</td>`).join('')}</tr>
-      </tbody>`;
-  } else T.innerHTML = `<tbody><tr><td class="note">Cargá los supuestos para ver la proyección.</td></tr></tbody>`;
-  return res;
+    const yr=new Date().getFullYear();
+    T.innerHTML=`<thead><tr><th>Concepto</th>${b.rows.map(r=>`<th>${yr+r.t}</th>`).join('')}</tr></thead><tbody>
+      <tr><td>Ventas</td>${b.rows.map(r=>`<td class="v">${fmtM(r.ventas)}</td>`).join('')}</tr>
+      <tr><td>FCF</td>${b.rows.map(r=>`<td class="v">${fmtM(r.fcf)}</td>`).join('')}</tr>
+      <tr><td>Factor desc.</td>${b.rows.map(r=>`<td class="v">${r.df.toFixed(2)}</td>`).join('')}</tr>
+      <tr><td>Valor presente</td>${b.rows.map(r=>`<td class="v">${fmtM(r.vp)}</td>`).join('')}</tr>
+    </tbody>`;
+  } else T.innerHTML=`<tbody><tr><td class="note">Cargá supuestos para ver la proyección.</td></tr></tbody>`;
 }
 
-/* =====================================================================
-   TAB MÉTRICAS — moat + radar
-   ===================================================================== */
-const MOAT = [
-  ['marca','Marca'], ['red','Efectos de red'], ['switching','Costos de cambio'],
-  ['escala','Economías de escala'], ['regulacion','Regulación / licencias'], ['tecnologia','Patentes / tecnología']
-];
+/* ============================================================ PROYECCIONES ---- */
+function renderProyecciones(){
+  const c=co(); if(!c) return;
+  const box=$('#projCard'); box.innerHTML='';
+  if(!c.proyecciones||!c.proyecciones.length){
+    box.innerHTML=`<div class="note">Sin proyecciones. Generá el análisis o buscá noticias.</div>`; return;
+  }
+  c.proyecciones.forEach(p=>{
+    const item=document.createElement('div'); item.className='proj-item';
+    const impClass=p.impacto==='positivo'?'up':p.impacto==='negativo'?'down':'neut';
+    const impTxt=p.impacto==='positivo'?'↑ positivo':p.impacto==='negativo'?'↓ negativo':'neutro';
+    item.innerHTML=`<span class="proj-dot"></span>
+      <div class="proj-text">${esc(p.texto)}
+        <div><span class="proj-impact ${impClass}">${impTxt}</span> ${p.fuente?`<span class="proj-src">${esc(p.fuente)}</span>`:''}
+        </div>
+      </div>`;
+    box.appendChild(item);
+  });
+}
+
+$('#refreshProj').onclick=async()=>{
+  const c=co(); if(!c) return;
+  if(!API){ toast('Sin backend para buscar noticias'); return; }
+  const tk=c.ficha.ticker||c.ficha.nombre; if(!tk){ toast('Completá el ticker primero'); return; }
+  $('#refreshProj').disabled=true; $('#refreshProj').textContent='Buscando…';
+  try{
+    const r=await fetch('/api/news',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ticker:tk,nombre:c.ficha.nombre,industria:c.ficha.industria})});
+    const j=await r.json(); if(j.error) throw new Error(j.error);
+    if(j.proyecciones) c.proyecciones=j.proyecciones;
+    save(); renderProyecciones(); toast('Noticias actualizadas');
+  }catch(e){ toast('Error: '+e.message); }
+  finally{ $('#refreshProj').disabled=false; $('#refreshProj').textContent='↻ Buscar noticias'; }
+};
+
+/* ============================================================ LIVE PRICE + UPDATE ---- */
+async function fetchLivePrice(ticker){
+  if(!ticker) return null;
+  try{
+    // Yahoo Finance v7 – pública, sin auth
+    const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(ticker)}&fields=regularMarketPrice,regularMarketChangePercent,regularMarketChange`;
+    const r=await fetch(url,{signal:AbortSignal.timeout(6000)});
+    if(!r.ok) return null;
+    const j=await r.json();
+    const q=j?.quoteResponse?.result?.[0];
+    if(!q) return null;
+    return {
+      price:q.regularMarketPrice,
+      change:q.regularMarketChange,
+      changePct:q.regularMarketChangePercent,
+      symbol:q.symbol
+    };
+  }catch(e){ return null; }
+}
+
+$('#updateBtn').onclick=async()=>{
+  const c=co(); if(!c) return;
+  const tk=c.ficha.ticker; if(!tk){ toast('Completá el ticker en la ficha'); return; }
+  $('#updateBtn').disabled=true; $('#updateBtn').textContent='Actualizando…';
+  $('#updateBar').classList.add('refreshing');
+  try{
+    const live=await fetchLivePrice(tk);
+    if(live){
+      c.liveData=live; c.val.precio=String(live.price.toFixed(2));
+      const el=$('#v_precio'); if(el) el.value=live.price.toFixed(2);
+      $('#livePrice').innerHTML=`<span style="font-weight:600">${live.symbol} $${live.price.toFixed(2)}</span> <span class="${live.changePct>=0?'pos':'neg'}">${live.changePct>=0?'+':''}${live.changePct.toFixed(2)}%</span>`;
+      $('#lastUpdText').textContent='hace un momento';
+      save(); renderValuation(); renderExport(); toast(`Precio actualizado: $${live.price.toFixed(2)}`);
+    } else { toast('No se pudo obtener el precio de Yahoo Finance'); }
+    if(API){
+      const analisis=[c.pasos.p1,c.pasos.p2,c.pasos.p3].join('\n\n');
+      if(analisis.trim().length>100){
+        const r=await fetch('/api/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ticker:tk,ficha:c.ficha,analisis,liveData:c.liveData})});
+        const j=await r.json(); if(j.proyecciones) c.proyecciones=j.proyecciones;
+        save(); renderProyecciones();
+      }
+    }
+  }finally{
+    $('#updateBtn').disabled=false; $('#updateBtn').textContent='Actualizar ahora';
+    $('#updateBar').classList.remove('refreshing');
+  }
+};
+
+/* ============================================================ CHART TÉCNICO ---- */
+let candleChart=null, volChart=null, chartPeriod='1mo', chartIndics=new Set(['sma20','sma50']);
+
+$$('#periodBtns .period-btn').forEach(b=>{ b.onclick=()=>{ $$('#periodBtns .period-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); chartPeriod=b.dataset.p; loadChart(); }; });
+$$('#indicBtns .indic-btn').forEach(b=>{ b.onclick=()=>{ b.classList.toggle('active'); const i=b.dataset.i; if(chartIndics.has(i)) chartIndics.delete(i); else chartIndics.add(i); loadChart(); }; });
+$('#loadChart').onclick=loadChart;
+
+async function loadChart(){
+  const c=co(); const tk=($('#chartTicker').value.trim()||c?.ficha?.ticker||'').toUpperCase();
+  if(!tk){ toast('Ingresá un ticker'); return; }
+  $('#chartNote').textContent='Cargando…';
+  try{
+    const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?range=${chartPeriod}&interval=${chartPeriod==='5y'?'1wk':'1d'}&events=history`;
+    const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j=await r.json();
+    const res=j?.chart?.result?.[0]; if(!res) throw new Error('Sin datos');
+    const ts=res.timestamps, q=res.indicators?.quote?.[0];
+    if(!ts||!q) throw new Error('Datos incompletos');
+    const dates=ts.map(t=>new Date(t*1000).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}));
+    const opens=q.open, highs=q.high, lows=q.low, closes=q.close, vols=q.volume;
+    drawCandle(dates,opens,highs,lows,closes,vols,tk);
+    $('#chartNote').textContent=`${tk} · ${dates.length} sesiones · desde ${dates[0]}`;
+  }catch(e){ $('#chartNote').textContent='Error al cargar: '+e.message+'. Verificá el ticker y la conexión.'; }
+}
+
+function sma(data,n){
+  return data.map((_,i)=>{ if(i<n-1) return null; const s=data.slice(i-n+1,i+1).filter(x=>x!=null); return s.length?s.reduce((a,b)=>a+b,0)/s.length:null; });
+}
+function boll(closes,n=20,k=2){
+  return closes.map((_,i)=>{ if(i<n-1) return {mid:null,up:null,lo:null}; const sl=closes.slice(i-n+1,i+1).filter(x=>x!=null); const m=sl.reduce((a,b)=>a+b,0)/sl.length; const sd=Math.sqrt(sl.reduce((a,b)=>a+(b-m)**2,0)/sl.length); return {mid:m,up:m+k*sd,lo:m-k*sd}; });
+}
+
+function isDark(){ return document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches); }
+
+function drawCandle(dates,opens,highs,lows,closes,vols,label){
+  const dark=isDark();
+  const gridC=dark?'rgba(255,255,255,.06)':'rgba(0,0,0,.05)';
+  const textC=dark?'#888':'#999';
+
+  const datasets=[];
+  // candlestick como barras flotantes (Chart.js no tiene velas nativas → usamos barras con plugin simple)
+  const candleData=dates.map((_,i)=>({ x:dates[i], o:opens[i], h:highs[i], l:lows[i], c:closes[i] }));
+
+  // Dibujamos usando scatter con líneas de whisker via plugin
+  if(candleChart){ candleChart.destroy(); candleChart=null; }
+  if(volChart){ volChart.destroy(); volChart=null; }
+
+  const ctx=$('#chartCanvas').getContext('2d');
+  const candlePlugin={
+    id:'candle',
+    afterDraw(chart){
+      const {ctx:c,scales:{x,y}}=chart;
+      candleData.forEach((d,i)=>{
+        if(d.o==null||d.c==null) return;
+        const xi=x.getPixelForValue(i);
+        const bw=Math.max(2,Math.min(10,(x.width/dates.length)*.6));
+        const yo=y.getPixelForValue(d.o), yc=y.getPixelForValue(d.c);
+        const yh=y.getPixelForValue(d.h), yl=y.getPixelForValue(d.l);
+        const up=d.c>=d.o;
+        c.beginPath(); c.strokeStyle=up?'#16a34a':'#dc2626'; c.lineWidth=1;
+        c.moveTo(xi,yh); c.lineTo(xi,yl); c.stroke();
+        c.fillStyle=up?'#16a34a':'#dc2626';
+        const top=Math.min(yo,yc), h=Math.max(1,Math.abs(yo-yc));
+        c.fillRect(xi-bw/2,top,bw,h);
+      });
+    }
+  };
+
+  const extraDS=[];
+  if(chartIndics.has('sma20')) extraDS.push({label:'SMA 20',data:sma(closes,20),borderColor:'#F97316',borderWidth:1.5,pointRadius:0,type:'line',tension:.3});
+  if(chartIndics.has('sma50')) extraDS.push({label:'SMA 50',data:sma(closes,50),borderColor:'#FBBF24',borderWidth:1.5,pointRadius:0,type:'line',tension:.3});
+  if(chartIndics.has('bb')){
+    const b=boll(closes);
+    extraDS.push({label:'BB UP',data:b.map(x=>x.up),borderColor:'rgba(249,115,22,.4)',borderWidth:1,pointRadius:0,type:'line',fill:false});
+    extraDS.push({label:'BB LO',data:b.map(x=>x.lo),borderColor:'rgba(249,115,22,.4)',borderWidth:1,pointRadius:0,type:'line',fill:'-1',backgroundColor:'rgba(249,115,22,.05)'});
+  }
+
+  candleChart=new Chart(ctx,{
+    type:'bar',
+    data:{ labels:dates, datasets:[{data:closes.map(()=>0),backgroundColor:'transparent',borderWidth:0},...extraDS] },
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:{duration:300},
+      plugins:{ legend:{display:extraDS.length>0, position:'top', labels:{font:{size:11},color:textC,boxWidth:20}}, tooltip:{enabled:false} },
+      scales:{ x:{ ticks:{color:textC,maxTicksLimit:8,font:{size:10}}, grid:{color:gridC} },
+        y:{ ticks:{color:textC,font:{size:10}}, grid:{color:gridC} } }
+    },
+    plugins:[candlePlugin]
+  });
+
+  if(chartIndics.has('vol')){
+    $('#chartIndicArea').classList.remove('hidden');
+    const vc=$('#volCanvas').getContext('2d');
+    if(volChart) volChart.destroy();
+    volChart=new Chart(vc,{
+      type:'bar',
+      data:{ labels:dates, datasets:[{label:'Volumen',data:vols,backgroundColor:closes.map((c,i)=>c>=(opens[i]||c)?'rgba(22,163,74,.5)':'rgba(220,38,38,.5)')}] },
+      options:{ responsive:true, maintainAspectRatio:false, animation:{duration:0},
+        plugins:{legend:{display:false}},
+        scales:{ x:{display:false}, y:{ticks:{color:textC,font:{size:9},callback:v=>v>=1e9?(v/1e9).toFixed(1)+'B':v>=1e6?(v/1e6).toFixed(0)+'M':v},grid:{color:gridC}} }
+      }
+    });
+  } else { $('#chartIndicArea').classList.add('hidden'); }
+}
+
+/* ============================================================ MOAT ---- */
+const MOAT=[['marca','Marca'],['red','Efectos de red'],['switching','Costos de cambio'],['escala','Economías de escala'],['regulacion','Regulación / licencias'],['tecnologia','Patentes / tecnología']];
 function renderMoat(){
-  const c = co(); if(!c) return;
-  const box = $('#moatInputs'); box.innerHTML = '';
-  MOAT.forEach(([k,label]) => {
-    const d = document.createElement('div');
-    d.style.cssText = 'display:flex;align-items:center;gap:12px;padding:7px 0';
-    d.innerHTML = `<span style="flex:1;font-size:13.5px">${label}</span>
-      <input type="range" min="0" max="5" step="1" value="${c.moat[k]}" style="width:150px;accent-color:var(--accent)">
-      <b class="num" style="width:14px;text-align:right;font-weight:500">${c.moat[k]}</b>`;
-    const r = d.querySelector('input'), b = d.querySelector('b');
-    r.oninput = () => { c.moat[k] = +r.value; b.textContent = r.value; save(); drawRadar(); renderExport(); };
+  const c=co(); if(!c) return;
+  const box=$('#moatInputsBox'); box.innerHTML='';
+  MOAT.forEach(([k,label])=>{
+    const d=document.createElement('div'); d.style.cssText='display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)';
+    d.innerHTML=`<span style="flex:1;font-size:13px">${label}</span>
+      <input type="range" min="0" max="5" step="1" value="${c.moat[k]}" style="width:130px;accent-color:var(--acc)">
+      <b class="mono" style="width:12px;text-align:right;font-weight:500">${c.moat[k]}</b>`;
+    const rng=d.querySelector('input'), bv=d.querySelector('b');
+    rng.oninput=()=>{ c.moat[k]=+rng.value; bv.textContent=rng.value; save(); drawRadar(); renderExport(); };
     box.appendChild(d);
   });
-  const s = document.createElement('div');
-  s.className = 'note'; s.style.marginTop = '10px';
-  s.textContent = 'La pregunta no es qué ventaja dice tener, sino qué te frenaría si quisieras robarle el negocio con mil millones en la mano.';
-  box.appendChild(s);
+  const note=document.createElement('div'); note.className='note'; note.style.marginTop='10px';
+  note.textContent='Si tuvieras miles de millones, ¿qué te impediría robarle el negocio?';
+  box.appendChild(note);
   drawRadar();
 }
 function drawRadar(){
-  const c = co(); if(!c) return;
-  const svg = $('#radar'), cx = 150, cy = 128, R = 92, n = MOAT.length;
-  const pt = (i, r) => {
-    const a = -Math.PI/2 + i * 2*Math.PI/n;
-    return [cx + Math.cos(a)*r, cy + Math.sin(a)*r];
-  };
-  let g = '';
-  for(let ring = 1; ring <= 5; ring++){
-    const p = Array.from({length:n}, (_,i) => pt(i, R*ring/5).map(v=>v.toFixed(1)).join(',')).join(' ');
-    g += `<polygon points="${p}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
-  }
-  for(let i=0;i<n;i++){ const [x,y]=pt(i,R); g += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`; }
-  const data = MOAT.map(([k],i) => pt(i, R * (c.moat[k]/5)).map(v=>v.toFixed(1)).join(','));
-  g += `<polygon points="${data.join(' ')}" fill="var(--accent)" fill-opacity=".16" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
-  MOAT.forEach(([k],i) => { const [x,y] = pt(i, R*(c.moat[k]/5)); g += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2" fill="var(--accent)"/>`; });
-  MOAT.forEach(([k,label],i) => {
-    const [x,y] = pt(i, R + 22);
-    const anchor = x < cx - 6 ? 'end' : x > cx + 6 ? 'start' : 'middle';
-    g += `<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${anchor}" font-size="11" fill="var(--ink-2)" font-family="Bricolage Grotesque,sans-serif">${label}</text>`;
-  });
-  const score = MOAT.reduce((a,[k])=>a+c.moat[k],0);
-  g += `<text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="13" fill="var(--ink-3)" font-family="IBM Plex Mono,monospace">${score}/30</text>`;
-  svg.innerHTML = g;
+  const c=co(); if(!c) return;
+  const svg=$('#radar'), cx=140,cy=123,R=86,n=MOAT.length;
+  const pt=(i,r)=>{ const a=-Math.PI/2+i*2*Math.PI/n; return [cx+Math.cos(a)*r,cy+Math.sin(a)*r]; };
+  let g='';
+  for(let ring=1;ring<=5;ring++){ const p=Array.from({length:n},(_,i)=>pt(i,R*ring/5).map(v=>v.toFixed(1)).join(',')).join(' '); g+=`<polygon points="${p}" fill="none" stroke="var(--line)" stroke-width="1"/>`; }
+  for(let i=0;i<n;i++){ const [x,y]=pt(i,R); g+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`; }
+  const data=MOAT.map(([k],i)=>pt(i,R*(c.moat[k]/5)).map(v=>v.toFixed(1)).join(','));
+  g+=`<polygon points="${data.join(' ')}" fill="var(--acc)" fill-opacity=".15" stroke="var(--acc)" stroke-width="2" stroke-linejoin="round"/>`;
+  MOAT.forEach(([k],i)=>{ const [x,y]=pt(i,R*(c.moat[k]/5)); g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="var(--acc)"/>`; });
+  MOAT.forEach(([k,label],i)=>{ const [x,y]=pt(i,R+20); const anchor=x<cx-6?'end':x>cx+6?'start':'middle'; g+=`<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${anchor}" font-size="10.5" fill="var(--ink-2)" font-family="Inter,sans-serif">${label}</text>`; });
+  const score=MOAT.reduce((a,[k])=>a+c.moat[k],0);
+  g+=`<text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="12" fill="var(--ink-3)" font-family="IBM Plex Mono,monospace">${score}/30</text>`;
+  svg.innerHTML=g;
 }
 
-/* =====================================================================
-   TAB MÉTRICAS — decisión, textos
-   ===================================================================== */
+/* ============================================================ DECISIÓN / CONV ---- */
 function renderDecision(){
-  const c = co(); if(!c) return;
-  $('#decision').value = c.decision;
-  $('#decision').onchange = e => { c.decision = e.target.value; save(); pill(); renderRail(); renderExport(); };
-  const box = $('#conv'); box.innerHTML = '';
+  const c=co(); if(!c) return;
+  $('#decision').value=c.decision;
+  $('#decision').onchange=e=>{ c.decision=e.target.value; save(); updatePill(); renderRail(); renderExport(); };
+  const box=$('#convRow'); box.innerHTML='';
   for(let i=1;i<=10;i++){
-    const el = document.createElement('i');
-    el.className = i <= c.conviccion ? 'on' : '';
-    el.title = i;
-    el.onclick = () => { c.conviccion = i; save(); renderDecision(); renderExport(); };
+    const el=document.createElement('div'); el.className='conv-pip'+(i<=c.conviccion?' on':'');
+    el.title=i; el.onclick=()=>{ c.conviccion=i; save(); renderDecision(); renderExport(); };
     box.appendChild(el);
   }
-  $('#convN').textContent = c.conviccion;
-  pill();
-  [['riesgos','riesgos'],['catal','catal'],['invalida','invalida'],['tesis','tesis']].forEach(([id,k]) => {
-    const el = $('#'+id); el.value = c[k] || '';
-    el.oninput = () => { c[k] = el.value; save(); renderExport(); };
+  $('#convN').textContent=c.conviccion;
+  updatePill();
+  [['riesgos','riesgos'],['catal','catal'],['invalida','invalida'],['tesis','tesis']].forEach(([id,k])=>{
+    const el=$('#'+id); el.value=c[k]||''; el.oninput=()=>{ c[k]=el.value; save(); renderExport(); };
   });
 }
-function pill(){
-  const c = co(); if(!c) return;
-  const p = $('#decPill');
-  p.textContent = c.decision;
-  p.className = 'pill ' + (c.decision === 'Comprar' ? 'buy' : c.decision === 'Esperar' ? 'wait' : 'no');
+function updatePill(){
+  const c=co(); if(!c) return;
+  const p=$('#decPill'); p.textContent=c.decision;
+  p.className='pill '+(c.decision==='Comprar'?'buy':c.decision==='Esperar'?'wait':'no');
 }
 
-/* =====================================================================
-   EXPORTACIÓN
-   ===================================================================== */
+/* ============================================================ EXPORT ---- */
 function exportRows(){
-  const c = co(); if(!c) return [];
-  const res = { bear: scnResult(c,'bear'), base: scnResult(c,'base'), bull: scnResult(c,'bull') };
-  const g = modeloGordon(c.val);
-  const precio = nz(c.val.precio);
-  const up = r => (r && r.porAccion && precio) ? ((r.porAccion/precio - 1)*100).toFixed(1) + '%' : '';
-  const moatScore = MOAT.reduce((a,[k])=>a+c.moat[k],0);
-  const R = [];
-  const add = (sec, k, v) => R.push([sec, k, v ?? '']);
+  const c=co(); if(!c) return [];
+  const res={bear:scnResult(c,'bear'),base:scnResult(c,'base'),bull:scnResult(c,'bull')};
+  const precio=nz(c.val.precio);
+  const up=r=>(r?.porAccion&&precio)?((r.porAccion/precio-1)*100).toFixed(1)+'%':'';
+  const R=[];
+  const add=(s,k,v)=>R.push([s,k,v??'']);
   add('Ficha','Empresa',c.ficha.nombre); add('Ficha','Ticker',c.ficha.ticker);
   add('Ficha','Mercado',c.ficha.mercado); add('Ficha','Industria',c.ficha.industria);
-  add('Ficha','Tipo',c.ficha.tipo); add('Ficha','Horizonte',c.ficha.horizonte);
-  KPIS.forEach(([k,label,u]) => add('Números', label + (u?` (${u})`:''), c.kpi[k]));
-  const spread = (nz(c.kpi.roic) && nz(c.kpi.wacc)) ? (nz(c.kpi.roic)-nz(c.kpi.wacc)).toFixed(1) : '';
-  add('Números','Spread ROIC - WACC (pts)', spread);
-  add('Números','¿Crea valor?', spread === '' ? '' : (+spread > 0 ? 'Sí' : 'No'));
-  VAL_INPUTS.forEach(([k,label,u]) => add('Supuestos', label + (u?` (${u})`:''), c.val[k]));
-  ['bear','base','bull'].forEach((k,i) => {
-    const nm = SCN[i][1];
-    add('Valoración', `Valor por acción · ${nm}`, res[k]?.porAccion ? res[k].porAccion.toFixed(2) : '');
-    add('Valoración', `Retorno implícito · ${nm}`, up(res[k]));
-  });
-  add('Valoración','Valor por acción · perpetuidad', g?.porAccion ? g.porAccion.toFixed(2) : '');
-  const mos = (res.base?.porAccion && precio) ? ((1 - precio/res.base.porAccion)*100).toFixed(1)+'%' : '';
-  add('Valoración','Margen de seguridad (base)', mos);
-  MOAT.forEach(([k,label]) => add('Moat', label + ' (0-5)', c.moat[k]));
-  add('Moat','Puntaje total (0-30)', moatScore);
-  add('Decisión','Decisión', c.decision);
-  add('Decisión','Convicción (1-10)', c.conviccion);
-  add('Decisión','Riesgos', oneLine(c.riesgos));
-  add('Decisión','Catalizadores', oneLine(c.catal));
-  add('Decisión','Qué invalida la tesis', oneLine(c.invalida));
-  add('Decisión','Tesis', oneLine(c.tesis));
-  add('Meta','Actualizado', new Date().toLocaleDateString('es-AR'));
+  ALL_METRICS.forEach(([k,l,u])=>add('Números',l+(u?` (${u})`:''),(c.kpi[k]??'')));
+  const sp=(nz(c.kpi.roic)&&nz(c.kpi.wacc))?(nz(c.kpi.roic)-nz(c.kpi.wacc)).toFixed(1):'';
+  add('Números','Spread ROIC-WACC (pts)',sp); add('Números','Crea valor',sp===''?'':(+sp>0?'Sí':'No'));
+  VAL_INPUTS.forEach(([k,l,u])=>add('Supuestos',l+(u?` (${u})`:''),(c.val[k]??'')));
+  SCN_DEF.forEach(([k,nm])=>{ add('Valoración',`Valor por acción · ${nm}`,res[k]?.porAccion?res[k].porAccion.toFixed(2):''); add('Valoración',`Retorno · ${nm}`,up(res[k])); });
+  const mos=(res.base?.porAccion&&precio)?((1-precio/res.base.porAccion)*100).toFixed(1)+'%':'';
+  add('Valoración','Margen de seguridad (base)',mos);
+  MOAT.forEach(([k,l])=>add('Moat',l+' (0-5)',c.moat[k]));
+  add('Moat','Total (0-30)',MOAT.reduce((a,[k])=>a+c.moat[k],0));
+  add('Decisión','Decisión',c.decision); add('Decisión','Convicción (1-10)',c.conviccion);
+  add('Decisión','Riesgos',c.riesgos?.replace(/\n+/g,' · ')||'');
+  add('Decisión','Catalizadores',c.catal?.replace(/\n+/g,' · ')||'');
+  add('Decisión','Invalida tesis',c.invalida?.replace(/\n+/g,' · ')||'');
+  add('Decisión','Tesis',c.tesis?.replace(/\n+/g,' · ')||'');
+  if(c.liveData) add('Live','Precio live',c.liveData.price?.toFixed(2)||'');
+  add('Meta','Actualizado',new Date().toLocaleDateString('es-AR'));
   return R;
 }
-const oneLine = s => String(s||'').replace(/\s*\n+\s*/g, ' · ').replace(/\t/g,' ').trim();
-
 function renderExport(){
-  const rows = exportRows();
-  const T = $('#exportTable');
-  T.innerHTML = `<thead><tr><th>Bloque</th><th style="text-align:left">Métrica</th><th>Valor</th></tr></thead><tbody>` +
-    rows.map(r => `<tr><td>${esc(r[0])}</td><td style="text-align:left;color:var(--ink)">${esc(r[1])}</td><td class="v">${esc(String(r[2]).slice(0,120))}</td></tr>`).join('') +
-    `</tbody>`;
+  const rows=exportRows();
+  const T=$('#exportTable');
+  T.innerHTML=`<thead><tr><th>Bloque</th><th>Métrica</th><th style="text-align:right">Valor</th></tr></thead><tbody>`+
+    rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td class="v">${esc(String(r[2]).slice(0,120))}</td></tr>`).join('')+'</tbody>';
 }
-function tsv(){
-  const c = co();
-  return ['Bloque\tMétrica\tValor', ...exportRows().map(r => r.map(x => String(x??'').replace(/\t|\n/g,' ')).join('\t'))].join('\n');
-}
-$('#copyBtn').onclick = async () => {
-  if(!co()) return;
-  try{ await navigator.clipboard.writeText(tsv()); toast('Copiado. Pegalo en Google Sheets con Ctrl+V'); }
-  catch(e){ toast('El navegador bloqueó el portapapeles: usá Descargar CSV'); }
-};
-$('#csvBtn').onclick = () => {
-  const c = co(); if(!c) return;
-  const csv = ['Bloque,Métrica,Valor', ...exportRows().map(r => r.map(x => `"${String(x??'').replace(/"/g,'""')}"`).join(','))].join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'}));
-  a.download = `tesis-${(c.ficha.ticker||'empresa').toLowerCase()}.csv`;
-  a.click(); URL.revokeObjectURL(a.href);
+function tsv(){ return ['Bloque\tMétrica\tValor',...exportRows().map(r=>r.map(x=>String(x??'').replace(/\t|\n/g,' ')).join('\t'))].join('\n'); }
+$('#copyBtn').onclick=async()=>{ if(!co()) return; try{ await navigator.clipboard.writeText(tsv()); toast('Copiado. Pegalo en Google Sheets.'); }catch(e){ toast('Usá CSV'); } };
+$('#csvBtn').onclick=()=>{
+  const c=co(); if(!c) return;
+  const csv=['Bloque,Métrica,Valor',...exportRows().map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`tesis-${(c.ficha.ticker||'empresa').toLowerCase()}.csv`; a.click(); URL.revokeObjectURL(a.href);
 };
 
-/* =====================================================================
-   TABS
-   ===================================================================== */
+/* ============================================================ TABS ---- */
 function go(t){
-  $$('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
-  $('#tab-carga').classList.toggle('hidden', t !== 'carga');
-  $('#tab-metricas').classList.toggle('hidden', t !== 'metricas');
-  if(t === 'metricas') renderMetricas();
-  window.scrollTo({top:0});
+  $$('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  $('#tab-carga').classList.toggle('hidden',t!=='carga');
+  $('#tab-metricas').classList.toggle('hidden',t!=='metricas');
+  if(t==='metricas') renderMetricas();
+  $('.scroll-area').scrollTop=0;
 }
-$$('.tab').forEach(b => b.onclick = () => go(b.dataset.tab));
+$$('.tab').forEach(b=>b.onclick=()=>go(b.dataset.tab));
 
-/* =====================================================================
-   EJEMPLO
-   ===================================================================== */
-$('#demoBtn').onclick = () => {
-  let c = co();
-  if(!c){ c = blank(); DB.cos.push(c); DB.sel = c.id; }
-  Object.assign(c.ficha, { nombre:'ASML Holding', ticker:'ASML', mercado:'Euronext / Nasdaq', industria:'Equipamiento de semiconductores', tipo:'Acción', horizonte:'Largo plazo' });
-  c.fuentes = [
-    { id:uid(), tipo:'PDF', nombre:'ASML Annual Report 2025.pdf', texto:'(ejemplo)'.repeat(400), chars:4000 },
-    { id:uid(), tipo:'TEXTO', nombre:'Transcript Q4 earnings call', texto:'(ejemplo)'.repeat(900), chars:9000 },
-    { id:uid(), tipo:'URL', nombre:'Investor presentation', url:'https://', texto:'(ejemplo)'.repeat(200), chars:2000 }
-  ];
-  c.pasos.p1 = `QUÉ VENDE
-ASML fabrica las máquinas de litografía que imprimen los circuitos sobre las obleas de silicio. Es el único proveedor del mundo de litografía EUV, la tecnología necesaria para los nodos más avanzados.
-
-CLIENTE
-Tres clientes explican la mayor parte del negocio: TSMC, Samsung e Intel. Concentración altísima, pero del lado correcto: son ellos los que compiten por conseguir las máquinas, no ASML por venderlas.
-
-CÓMO GANA PLATA
-Dos motores. Venta de sistemas, que es lumpy y depende del ciclo de capex de las foundries. Y una base instalada creciente que genera servicio, upgrades y repuestos: ingreso recurrente, margen alto y mucho menos cíclico.
-
-POR QUÉ ES DIFÍCIL DE COPIAR
-No es una patente, es una cadena de suministro de treinta años. Requiere las ópticas de Zeiss, una fuente de luz de plasma de estaño, y sobre todo el aprendizaje acumulado de instalar y mantener estas máquinas en fábricas reales. Un competidor con capital ilimitado necesitaría más de una década.`;
-  c.pasos.p2 = `INGRESOS
-Diez años de historia: de ~$7.2B a ~$38.4B. Compuesto cercano al 20% anual, pero con dos años de caída en el medio. No es un negocio suave, es un negocio bueno con forma cíclica.
-
-MÁRGENES
-Bruto en torno al 51-53% y subiendo con el mix EUV/High-NA. Operativo cerca del 32%. La mejora no vino de recortar costos sino de vender máquinas más caras a clientes que no tienen alternativa.
-
-CAJA
-FCF muy volátil año a año — de $3.6B en un año flojo a $13B en uno bueno — porque el capital de trabajo se mueve con los pagos anticipados de clientes. La rentabilidad FCF/ventas promedia cerca de 27% en la década.
-
-BALANCE
-Caja de ~$7.9B contra deuda de ~$5.4B: posición neta de caja. Nada de fragilidad financiera.
-
-RETORNOS
-ROIC muy por encima del costo de capital de forma sostenida. El spread no es un año bueno, es la característica estructural del negocio.`;
-  c.pasos.p3 = `MOTOR DEL CRECIMIENTO
-No es volumen de unidades, es precio y mix. Cada generación de máquina es más cara que la anterior y el cliente la necesita más. Ese es el crecimiento sano: no requiere capital proporcional.
-
-UNIT ECONOMICS
-El dólar incremental de ingresos llega con margen incremental superior al promedio, porque el costo fijo de I+D ya está pagado. La base instalada agrega servicio de alto margen sin capex nuevo.
-
-ASIGNACIÓN DE CAPITAL
-Reinversión fuerte en I+D — correcto, es lo que sostiene el monopolio. Recompras que históricamente se hicieron con criterio. Dividendo creciente pero no comprometedor. Sin adquisiciones grandes que destruyan valor.
-
-RIESGO DE DISRUPCIÓN
-El riesgo no es que aparezca un competidor con EUV. Es que la industria encuentre otro camino: chiplets, apilado 3D, materiales nuevos, o que la demanda de nodos avanzados se sature. También el riesgo político: las restricciones de exportación a China son una variable exógena que ASML no controla.
-
-QUÉ DESCUENTA EL PRECIO
-A los múltiplos actuales el mercado ya paga por una década de crecimiento sostenido y sin interrupciones políticas. La discusión no es si el negocio es extraordinario — lo es — sino cuánto de ese futuro ya está en el precio.`;
-  Object.assign(c.kpi, { ingresos:'38371', crecIngresos:'31.1', mBruto:'51.9', mOperativo:'32.4', mNeto:'27.1', fcf:'13022', roic:'28', roe:'42', wacc:'9.3', per:'34', perHist:'31', deudaNeta:'-2511' });
-  Object.assign(c.val, { precio:'1714.88', acciones:'384.1', caja:'7912', deuda:'5400', ventasBase:'43500', margenFcf:'27.2', crec15:'25', crec610:'15', tasaK:'15', multiplo:'30', fclBase:'13022', g:'2.5' });
-  c.scn.bear = { crec15:'12', margenFcf:'22', multiplo:'20' };
-  c.scn.base = { crec15:'', margenFcf:'', multiplo:'' };
-  c.scn.bull = { crec15:'30', margenFcf:'30', multiplo:'35' };
-  Object.assign(c.moat, { marca:3, red:2, switching:5, escala:4, regulacion:3, tecnologia:5 });
-  c.decision = 'Esperar'; c.conviccion = 7;
-  c.riesgos = 'Restricciones de exportación a China: si se amplían, cae un porcentaje relevante de ventas de sistemas y ASML no tiene forma de compensarlo en el corto plazo.\nCiclo de capex de foundries: si TSMC recorta inversión, los pedidos se posponen y el revenue de sistemas cae fuerte aunque el negocio no se deteriore.\nConcentración: tres clientes deciden el año.';
-  c.catal = 'Adopción de High-NA EUV a volumen.\nRecuperación del ciclo de memoria.\nCrecimiento de la base instalada, que hace el ingreso menos cíclico.';
-  c.invalida = 'Que el margen de servicio deje de crecer con la base instalada.\nQue aparezca una vía tecnológica que evite la litografía avanzada.\nQue los clientes logren posponer compras sin perder competitividad.';
-  c.tesis = 'Compro el único cuello de botella de una industria que el mundo necesita expandir. La ventaja no es una patente sino tres décadas de cadena de suministro que nadie puede comprimir. Lo que el mercado discute mal es la ciclicidad: trata cada bache de pedidos como deterioro estructural cuando es timing de capex de tres clientes. Lo que yo puedo estar subestimando es el riesgo político, que no es analizable con estados financieros. A este precio la calidad está reconocida; espero un ciclo flojo para pagar menos por lo mismo.';
-  save(); renderAll(); toast('Ejemplo cargado');
-};
-
-/* =====================================================================
-   RENDER
-   ===================================================================== */
+/* ============================================================ RENDER ALL ---- */
 function renderMetricas(){
   if(!co()) return;
-  renderCtx(); renderKPIs(); renderValInputs(); renderScns();
-  renderValuation(); renderMoat(); renderDecision(); renderExport();
+  renderCtx(); renderDash(); renderValInputs(); renderScns(); renderValuation();
+  renderMoat(); renderDecision(); renderProyecciones(); renderExport();
 }
 function renderAll(){
   renderRail();
   if(!co()) return;
   renderFicha(); renderSrcs(); renderSteps(); renderCtx();
-  if(!$('#tab-metricas').classList.contains('hidden')) renderMetricas();
+  if(activeTab()==='metricas') renderMetricas();
 }
 
-/* tema */
-$('#themeBtn').onclick = () => {
-  const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : cur === 'light' ? '' : 'dark';
-  if(next) document.documentElement.setAttribute('data-theme', next);
-  else document.documentElement.removeAttribute('data-theme');
-  try{ localStorage.setItem('tesis.theme', next); }catch(e){}
-  setTimeout(drawRadar, 30);
+/* ============================================================ DEMO ---- */
+$('#demoBtn').onclick=()=>{
+  let c=co(); if(!c){ c=blank(); DB.cos.push(c); DB.sel=c.id; }
+  Object.assign(c.ficha,{nombre:'ASML Holding',ticker:'ASML',mercado:'Euronext / Nasdaq',industria:'Equipamiento semiconductores',tipo:'Acción',horizonte:'Largo plazo'});
+  c.fuentes=[{id:uid(),tipo:'PDF',nombre:'ASML Annual Report 2025.pdf',texto:'(demo)'.repeat(600),chars:6000},{id:uid(),tipo:'TEXTO',nombre:'Transcript Q4 earnings',texto:'(demo)'.repeat(900),chars:9000}];
+  c.pasos.p1=`QUÉ VENDE\nASML fabrica las máquinas de litografía que imprimen los circuitos sobre obleas de silicio. Es el único proveedor mundial de litografía EUV, la tecnología necesaria para los nodos más avanzados (sub-7nm).\n\nCLIENTE\nTres clientes explican la mayor parte del negocio: TSMC, Samsung e Intel. Concentración altísima, pero del lado correcto: ellos compiten por conseguir las máquinas, no ASML por venderlas.\n\nCÓMO GANA PLATA\nDos motores. Venta de sistemas (lumpy, depende del ciclo de capex) y base instalada creciente que genera servicio, upgrades y repuestos: ingreso recurrente, margen alto, mucho menos cíclico.\n\nPOR QUÉ ES DIFÍCIL DE COPIAR\nNo es una patente, es una cadena de suministro de treinta años. Ópticas de Zeiss, fuente de plasma de estaño, aprendizaje acumulado. Un competidor con capital ilimitado necesitaría más de una década.`;
+  c.pasos.p2=`INGRESOS\nDiez años: de ~$7.2B a ~$38.4B. CAGR cercano al 20%, pero con dos años de caída. No es un negocio suave, es un negocio bueno con forma cíclica.\n\nMÁRGENES\nBruto ~51-53% y subiendo con el mix EUV/High-NA. Operativo ~32%. La mejora no vino de recortar costos sino de vender máquinas más caras a clientes sin alternativa.\n\nCAJA\nFCF muy volátil año a año —de $3.6B en un año flojo a $13B en uno bueno— porque el capital de trabajo se mueve con los pagos anticipados de clientes.\n\nBALANCE\nCaja ~$7.9B contra deuda ~$5.4B: posición neta de caja.\n\nRETORNOS\nROIC muy por encima del costo de capital de forma sostenida. No es un año bueno, es la característica estructural del negocio.`;
+  c.pasos.p3=`MOTOR DEL CRECIMIENTO\nNo es volumen de unidades, es precio y mix. Cada generación de máquina es más cara que la anterior y el cliente la necesita más.\n\nRIESGO DE DISRUPCIÓN\nEl riesgo no es que aparezca un competidor EUV. Es que la industria encuentre otro camino: chiplets, apilado 3D, materiales nuevos. También el riesgo político: restricciones de exportación a China.\n\nQUÉ DESCUENTA EL PRECIO\nA los múltiplos actuales el mercado ya paga por una década de crecimiento sostenido y sin interrupciones políticas. La pregunta no es si el negocio es extraordinario —lo es— sino cuánto de ese futuro ya está en el precio.`;
+  Object.assign(c.kpi,{ingresos:'38371',crecIngresos:'31.1',mBruto:'51.9',mOperativo:'32.4',mNeto:'27.1',fcf:'13022',roic:'28',roe:'42',wacc:'9.3',per:'34',perHist:'31',deudaNeta:'-2511'});
+  Object.assign(c.val,{precio:'1714.88',acciones:'384.1',caja:'7912',deuda:'5400',ventasBase:'43500',margenFcf:'27.2',crec15:'25',crec610:'15',tasaK:'15',multiplo:'30'});
+  c.scn.bear={crec15:'12',margenFcf:'22',multiplo:'20'}; c.scn.base={crec15:'',margenFcf:'',multiplo:''}; c.scn.bull={crec15:'30',margenFcf:'30',multiplo:'35'};
+  Object.assign(c.moat,{marca:3,red:2,switching:5,escala:4,regulacion:3,tecnologia:5});
+  c.decision='Esperar'; c.conviccion=7;
+  c.riesgos='Restricciones de exportación a China: si se amplían, cae un porcentaje relevante de ventas de sistemas.\nCiclo de capex de foundries: si TSMC recorta, los pedidos se posponen.\nConcentración: tres clientes deciden el año.';
+  c.catal='Adopción de High-NA EUV a volumen.\nRecuperación del ciclo de memoria.\nCrecimiento de la base instalada.';
+  c.invalida='Que el margen de servicio deje de crecer con la base instalada.\nQue aparezca una vía tecnológica que evite la litografía avanzada.\nQue los clientes logren posponer sin perder competitividad.';
+  c.tesis='Compro el único cuello de botella de una industria que el mundo necesita expandir. La ventaja no es una patente sino tres décadas de cadena de suministro que nadie puede comprimir. Lo que el mercado discute mal es la ciclicidad: trata cada bache de pedidos como deterioro estructural cuando es timing de capex de tres clientes. A este precio la calidad está reconocida; espero un ciclo flojo para pagar menos por lo mismo.';
+  c.proyecciones=[
+    {texto:'High-NA EUV en producción masiva esperada desde 2026, lo que impulsaría el precio por unidad y el mix de ingresos.',fuente:'ASML Investor Day 2025',impacto:'positivo'},
+    {texto:'Restricciones de exportación a China extendidas por el gobierno de EE.UU. podrían afectar hasta el 15% de ventas de sistemas.',fuente:'Reuters, ago 2025',impacto:'negativo'},
+    {texto:'TSMC mantiene su plan de capex de $40B para 2026, lo que sostiene la demanda de sistemas EUV.',fuente:'TSMC Earnings Q2 2025',impacto:'positivo'},
+    {texto:'Ciclo de semiconductores en recuperación desde mediados de 2025, con backlog en máximos históricos.',fuente:'Análisis propio',impacto:'positivo'}
+  ];
+  c.dashMetrics=['ingresos','crecIngresos','mBruto','mOperativo','fcf','roic','per','perHist'];
+  save(); renderAll(); toast('Ejemplo ASML cargado');
 };
-try{ const t = localStorage.getItem('tesis.theme'); if(t) document.documentElement.setAttribute('data-theme', t); }catch(e){}
 
-/* arranque */
+/* ============================================================ TEMA ---- */
+$('#themeBtn').onclick=()=>{
+  const cur=document.documentElement.dataset.theme;
+  const next=cur==='dark'?'light':cur==='light'?'':'dark';
+  if(next) document.documentElement.dataset.theme=next; else delete document.documentElement.dataset.theme;
+  try{ localStorage.setItem('tesis.theme',next); }catch(e){}
+  setTimeout(()=>{ if(co()) drawRadar(); if(candleChart) loadChart(); },40);
+};
+try{ const t=localStorage.getItem('tesis.theme'); if(t) document.documentElement.dataset.theme=t; }catch(e){}
+
+/* ============================================================ ARRANQUE ---- */
 load();
-if(!DB.cos.length){ const c = blank(); DB.cos.push(c); DB.sel = c.id; }
-if(!DB.sel || !co()) DB.sel = DB.cos[0].id;
+if(!DB.cos.length){ const c=blank(); DB.cos.push(c); DB.sel=c.id; }
+if(!DB.sel||!co()) DB.sel=DB.cos[0].id;
 renderAll();
 detectAPI();
 </script>

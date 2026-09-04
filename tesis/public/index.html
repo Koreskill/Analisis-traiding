@@ -226,9 +226,9 @@ details[open] .step-chev{transform:rotate(90deg)}
 }
 .kpi-card:active{cursor:grabbing; opacity:.8}
 .kpi-card.drag-over{border-color:var(--acc)}
-.kpi-card.tint-a{background:color-mix(in srgb,var(--acc) 6%,var(--panel))}
-.kpi-card.tint-b{background:color-mix(in srgb,var(--acc2) 8%,var(--panel))}
-.kpi-card.tint-c{background:color-mix(in srgb,var(--good) 6%,var(--panel))}
+.kpi-card.tint-a{border-left:3px solid var(--acc); background:var(--panel)}
+.kpi-card.tint-b{border-left:3px solid var(--acc2); background:var(--panel)}
+.kpi-card.tint-c{border-left:3px solid var(--good); background:var(--panel)}
 .kpi-k{font-size:11px; color:var(--ink-3); display:block; margin-bottom:2px}
 .kpi-v{font-size:20px; font-weight:500; letter-spacing:-.02em; display:flex; align-items:baseline; gap:3px}
 .kpi-input{
@@ -242,7 +242,7 @@ details[open] .step-chev{transform:rotate(90deg)}
 /* ---- valoración ---- */
 .gauge-wrap{padding:18px; border:1px solid var(--line); border-radius:var(--r); background:var(--panel)}
 .gauge-bar{height:40px; border-radius:10px; position:relative; margin:26px 0 6px;
-  background:linear-gradient(90deg,var(--bad-soft) 0%,var(--warn-soft) 45%,var(--good-soft) 100%)}
+  background:linear-gradient(90deg,#fca5a5 0%,#fde68a 45%,#86efac 100%); opacity:.75}
 .gauge-mark{position:absolute; top:-22px; bottom:-4px; width:2px; background:var(--ink); border-radius:2px}
 .gauge-mark span{position:absolute; top:-3px; left:50%; transform:translate(-50%,-100%); white-space:nowrap;
   font-size:11px; background:var(--ink); color:var(--bg); padding:2px 6px; border-radius:5px; font-weight:500}
@@ -256,9 +256,9 @@ details[open] .step-chev{transform:rotate(90deg)}
 /* ---- escenarios ---- */
 .scn-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
 .scn{border:1px solid var(--line); border-radius:var(--r); padding:13px}
-.scn.bear{border-color:color-mix(in srgb,var(--bad) 30%,transparent); background:var(--bad-soft)}
-.scn.base{border-color:color-mix(in srgb,var(--acc2) 30%,transparent); background:var(--warn-soft)}
-.scn.bull{border-color:color-mix(in srgb,var(--good) 30%,transparent); background:var(--good-soft)}
+.scn.bear{border-color:color-mix(in srgb,var(--bad) 22%,transparent); background:color-mix(in srgb,#fca5a5 12%,var(--panel))}
+.scn.base{border-color:color-mix(in srgb,var(--acc2) 22%,transparent); background:color-mix(in srgb,#fde68a 12%,var(--panel))}
+.scn.bull{border-color:color-mix(in srgb,var(--good) 22%,transparent); background:color-mix(in srgb,#86efac 12%,var(--panel))}
 .scn h4{font-size:13px; font-weight:600; margin-bottom:2px}
 .scn .scn-r{font-size:24px; font-weight:600; letter-spacing:-.025em; margin:5px 0 2px}
 
@@ -1095,21 +1095,30 @@ $('#refreshProj').onclick=async()=>{
 /* ============================================================ LIVE PRICE + UPDATE ---- */
 async function fetchLivePrice(ticker){
   if(!ticker) return null;
+  // Primero intenta el backend (Stooq + Yahoo server-side, sin CORS)
+  if(API){
+    try{
+      const r=await fetch('/api/quote',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ticker}),signal:AbortSignal.timeout(10000)});
+      if(r.ok){ const j=await r.json(); if(j.price) return j; }
+    }catch(e){}
+  }
+  // Fallback: Stooq directo (permite CORS desde browser para algunos tickers)
   try{
-    // Yahoo Finance v7 – pública, sin auth
-    const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(ticker)}&fields=regularMarketPrice,regularMarketChangePercent,regularMarketChange`;
-    const r=await fetch(url,{signal:AbortSignal.timeout(6000)});
-    if(!r.ok) return null;
-    const j=await r.json();
-    const q=j?.quoteResponse?.result?.[0];
-    if(!q) return null;
-    return {
-      price:q.regularMarketPrice,
-      change:q.regularMarketChange,
-      changePct:q.regularMarketChangePercent,
-      symbol:q.symbol
-    };
-  }catch(e){ return null; }
+    const sym=ticker.includes('.')?ticker:ticker+'.US';
+    const r=await fetch(`https://stooq.com/q/l/?s=${encodeURIComponent(sym)}&f=sd2t2ohlcv&h&e=csv`,
+      {signal:AbortSignal.timeout(8000),mode:'cors'});
+    if(r.ok){
+      const csv=await r.text();
+      const lines=csv.trim().split('\n');
+      if(lines.length>=2){
+        const cols=lines[1].split(',');
+        const price=parseFloat(cols[4]||cols[3]);
+        if(price&&!isNaN(price)) return {price,change:0,changePct:0,symbol:ticker};
+      }
+    }
+  }catch(e){}
+  return null;
 }
 
 $('#updateBtn').onclick=async()=>{
@@ -1125,7 +1134,7 @@ $('#updateBtn').onclick=async()=>{
       $('#livePrice').innerHTML=`<span style="font-weight:600">${live.symbol} $${live.price.toFixed(2)}</span> <span class="${live.changePct>=0?'pos':'neg'}">${live.changePct>=0?'+':''}${live.changePct.toFixed(2)}%</span>`;
       $('#lastUpdText').textContent='hace un momento';
       save(); renderValuation(); renderExport(); toast(`Precio actualizado: $${live.price.toFixed(2)}`);
-    } else { toast('No se pudo obtener el precio de Yahoo Finance'); }
+    } else { toast('No se pudo obtener el precio. Verificá el ticker.'); }
     if(API){
       const analisis=[c.pasos.p1,c.pasos.p2,c.pasos.p3].join('\n\n');
       if(analisis.trim().length>100){
@@ -1148,22 +1157,78 @@ $$('#indicBtns .indic-btn').forEach(b=>{ b.onclick=()=>{ b.classList.toggle('act
 $('#loadChart').onclick=loadChart;
 
 async function loadChart(){
-  const c=co(); const tk=($('#chartTicker').value.trim()||c?.ficha?.ticker||'').toUpperCase();
+  const c=co();
+  const tk=($('#chartTicker').value.trim()||c?.ficha?.ticker||'').toUpperCase();
   if(!tk){ toast('Ingresá un ticker'); return; }
-  $('#chartNote').textContent='Cargando…';
+  $('#chartNote').textContent='Cargando gráfico…';
+  const area=$('#chartArea');
+
+  // ── TradingView widget (funciona en la versión desplegada en VPS) ──
+  const tryTradingView=()=>new Promise((resolve,reject)=>{
+    const launch=()=>{
+      try{
+        area.innerHTML='';
+        area.id='chartArea';
+        const container=document.createElement('div');
+        container.id='tv_container';
+        container.style.cssText='width:100%;height:100%';
+        area.appendChild(container);
+        new window.TradingView.widget({
+          container_id:'tv_container',
+          autosize:true,
+          symbol:tk,
+          interval:({
+            '1mo':'D','3mo':'D','6mo':'D','1y':'W','5y':'M'
+          })[chartPeriod]||'D',
+          timezone:'Etc/UTC',
+          theme:isDark()?'dark':'light',
+          style:'1',
+          locale:'es',
+          enable_publishing:false,
+          hide_top_toolbar:false,
+          hide_legend:false,
+          studies: [
+            ...(chartIndics.has('sma20')?['MASimple@tv-basicstudies']:[]),
+            ...(chartIndics.has('bb')?['BB@tv-basicstudies']:[]),
+            ...(chartIndics.has('vol')?['Volume@tv-basicstudies']:[])
+          ]
+        });
+        resolve(true);
+      }catch(e){reject(e);}
+    };
+    if(window.TradingView){ launch(); }
+    else{
+      const s=document.createElement('script');
+      s.src='https://s3.tradingview.com/tv.js';
+      s.onload=launch;
+      s.onerror=()=>reject(new Error('TradingView no disponible'));
+      document.head.appendChild(s);
+    }
+  });
+
   try{
-    const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(tk)}?range=${chartPeriod}&interval=${chartPeriod==='5y'?'1wk':'1d'}&events=history`;
-    const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
+    await tryTradingView();
+    $('#chartNote').textContent=`${tk} · TradingView · velas en tiempo real`;
+    return;
+  }catch(tvErr){}
+
+  // ── Fallback: datos del backend (Stooq) + Chart.js ──
+  try{
+    if(!API){ throw new Error('sin backend'); }
+    const r=await fetch(`/api/chart?symbol=${encodeURIComponent(tk)}&period=${chartPeriod}`,
+      {signal:AbortSignal.timeout(15000)});
     if(!r.ok) throw new Error('HTTP '+r.status);
     const j=await r.json();
-    const res=j?.chart?.result?.[0]; if(!res) throw new Error('Sin datos');
-    const ts=res.timestamps, q=res.indicators?.quote?.[0];
-    if(!ts||!q) throw new Error('Datos incompletos');
-    const dates=ts.map(t=>new Date(t*1000).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}));
-    const opens=q.open, highs=q.high, lows=q.low, closes=q.close, vols=q.volume;
+    if(j.error) throw new Error(j.error);
+    const dates=j.data.map(d=>d.date);
+    const opens=j.data.map(d=>d.open), highs=j.data.map(d=>d.high),
+          lows=j.data.map(d=>d.low), closes=j.data.map(d=>d.close), vols=j.data.map(d=>d.volume);
+    area.innerHTML='<canvas id="chartCanvas" style="width:100%;height:100%"></canvas>';
     drawCandle(dates,opens,highs,lows,closes,vols,tk);
-    $('#chartNote').textContent=`${tk} · ${dates.length} sesiones · desde ${dates[0]}`;
-  }catch(e){ $('#chartNote').textContent='Error al cargar: '+e.message+'. Verificá el ticker y la conexión.'; }
+    $('#chartNote').textContent=`${tk} · ${dates.length} sesiones (Stooq) · desde ${dates[0]}`;
+  }catch(e){
+    $('#chartNote').textContent='No se pudo cargar el gráfico: '+e.message+'. En la versión desplegada carga automáticamente con TradingView.';
+  }
 }
 
 function sma(data,n){
